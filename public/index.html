@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevRadar Daily</title>
+
+  <style>
+    :root {
+      --bg: #fff4d6;
+      --ink: #111111;
+      --muted: #4b5563;
+      --card: #ffffff;
+      --blue: #4f7cff;
+      --pink: #ff5ca8;
+      --yellow: #ffe45c;
+      --green: #66e28a;
+      --orange: #ff9f43;
+      --shadow: 8px 8px 0 var(--ink);
+      --shadow-sm: 4px 4px 0 var(--ink);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 92, 168, 0.22), transparent 24%),
+        radial-gradient(circle at 90% 18%, rgba(79, 124, 255, 0.22), transparent 28%),
+        linear-gradient(135deg, #fff4d6 0%, #fef3c7 100%);
+      color: var(--ink);
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 4px;
+      font-weight: 800;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 52px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      background: var(--yellow);
+      box-shadow: var(--shadow-sm);
+      font-size: 28px;
+      transform: rotate(-3deg);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1;
+      letter-spacing: -1.4px;
+    }
+
+    .brand-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: var(--blue);
+      color: white;
+      padding: 12px 18px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .btn.secondary {
+      background: var(--card);
+      color: var(--ink);
+    }
+
+    .hero {
+      position: relative;
+      border: 4px solid var(--ink);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      height: 18px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--pink) 0 60px,
+        var(--yellow) 60px 120px,
+        var(--green) 120px 180px,
+        var(--blue) 180px 240px
+      );
+      border-bottom: 4px solid var(--ink);
+    }
+
+    .hero-inner {
+      padding: 52px 28px 28px;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      background: var(--yellow);
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .pill.blue {
+      background: #dbeafe;
+    }
+
+    .pill.green {
+      background: #dcfce7;
+    }
+
+    .digest-title {
+      margin: 0;
+      font-size: clamp(30px, 6vw, 62px);
+      line-height: 0.95;
+      letter-spacing: -2.2px;
+      max-width: 920px;
+    }
+
+    .meta {
+      margin-top: 18px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      border: 4px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--green);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 3px solid rgba(0, 0, 0, 0.18);
+      font-weight: 900;
+    }
+
+    .content-card {
+      border: 4px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 4px solid var(--ink);
+      background: var(--pink);
+      font-weight: 900;
+    }
+
+    .content {
+      padding: 26px;
+      font-size: 17px;
+    }
+
+    .content h2,
+    .content h3 {
+      width: fit-content;
+      margin: 30px 0 12px;
+      padding: 8px 12px;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      background: var(--yellow);
+      box-shadow: var(--shadow-sm);
+      line-height: 1.2;
+    }
+
+    .content h2:first-child,
+    .content h3:first-child {
+      margin-top: 0;
+    }
+
+    .content p {
+      margin: 12px 0;
+    }
+
+    .content ul {
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .content li {
+      margin: 12px 0;
+      padding: 14px 16px;
+      border: 3px solid var(--ink);
+      border-radius: 14px;
+      background: #fffaf0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .content strong {
+      background: #dbeafe;
+      padding: 1px 4px;
+      border-radius: 6px;
+    }
+
+    .content em {
+      font-style: normal;
+      background: #fef3c7;
+      padding: 1px 4px;
+      border-radius: 6px;
+    }
+
+    .loading {
+      display: grid;
+      place-items: center;
+      min-height: 260px;
+      text-align: center;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    .error {
+      border: 4px solid var(--ink);
+      background: #fecaca;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      font-weight: 900;
+    }
+
+    .footer {
+      margin-top: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    @media (max-width: 820px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .hero-inner,
+      .content {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">📡</div>
+        <div>
+          <h1 class="brand-title">DevRadar</h1>
+          <p class="brand-subtitle">Daily tech signal, không đọc lan man.</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn secondary" onclick="openJson()">Xem JSON</button>
+        <button class="btn" onclick="loadDigest()">Tải lại bản tin</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="status-row">
+          <span id="badge" class="pill">📰 Đang tải</span>
+          <span id="freshness" class="pill blue">⏳ Syncing</span>
+        </div>
+
+        <h2 id="title" class="digest-title">Đang kéo bản tin mới nhất...</h2>
+        <div id="meta" class="meta"></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="sidebar">
+        <h2>Radar Stats</h2>
+        <div class="stat">
+          <span>Digest</span>
+          <span id="stat-date">--</span>
+        </div>
+        <div class="stat">
+          <span>Trạng thái</span>
+          <span id="stat-status">--</span>
+        </div>
+        <div class="stat">
+          <span>Độ dài</span>
+          <span id="stat-words">--</span>
+        </div>
+      </aside>
+
+      <article class="content-card">
+        <div class="content-header">
+          <span>⚡ Today's Brief</span>
+          <span id="updated-small">--</span>
+        </div>
+        <div id="content" class="content">
+          <div class="loading">Đang tải dữ liệu từ DevRadar API...</div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      Built with DevRadar · Hacker News / DEV.to / GitHub → Gemini → Daily Digest
+    </footer>
+  </main>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function safeUrl(url) {
+      const value = String(url || '').trim();
+
+      if (!/^https?:\/\//i.test(value)) {
+        return '#';
+      }
+
+      return escapeHtml(value);
+    }
+
+    function inlineMarkdown(text) {
+      const links = [];
+
+      // Bước 1: tách markdown link ra placeholder trước.
+      // Nếu không làm vậy, regex raw URL sẽ ăn cả URL bên trong href và làm vỡ link.
+      let source = String(text || '').replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        (_match, label, url) => {
+          const index = links.length;
+          links.push(
+            `<a href="${safeUrl(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`,
+          );
+          return `@@DEV_RADAR_LINK_${index}@@`;
+        },
+      );
+
+      // Bước 2: escape HTML để không inject code lạ từ API/AI.
+      let safe = escapeHtml(source);
+
+      // Bước 3: inline markdown cơ bản.
+      safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      safe = safe.replace(/(^|[^*])\*(?!\s)([^*]+?)\*/g, '$1<em>$2</em>');
+
+      // Bước 4: convert raw URL còn lại thành link.
+      safe = safe.replace(
+        /(^|[\s(])((https?:\/\/[^\s<>"')]+))/g,
+        (_match, prefix, url) =>
+          `${prefix}<a href="${safeUrl(url)}" target="_blank" rel="noreferrer">${escapeHtml(url)}</a>`,
+      );
+
+      // Bước 5: trả markdown link placeholder về HTML anchor.
+      links.forEach((anchor, index) => {
+        safe = safe.replaceAll(`@@DEV_RADAR_LINK_${index}@@`, anchor);
+      });
+
+      return safe;
+    }
+
+    function renderMarkdownBasic(markdown) {
+      const lines = String(markdown || '').split('\n');
+      const html = [];
+      let inList = false;
+
+      function closeList() {
+        if (inList) {
+          html.push('</ul>');
+          inList = false;
+        }
+      }
+
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+
+        if (!line) {
+          closeList();
+          continue;
+        }
+
+        if (line.startsWith('### ')) {
+          closeList();
+          html.push(`<h3>${inlineMarkdown(line.slice(4))}</h3>`);
+          continue;
+        }
+
+        if (line.startsWith('## ')) {
+          closeList();
+          html.push(`<h2>${inlineMarkdown(line.slice(3))}</h2>`);
+          continue;
+        }
+
+        if (line.startsWith('# ')) {
+          closeList();
+          html.push(`<h2>${inlineMarkdown(line.slice(2))}</h2>`);
+          continue;
+        }
+
+        if (line.startsWith('- ')) {
+          if (!inList) {
+            html.push('<ul>');
+            inList = true;
+          }
+
+          html.push(`<li>${inlineMarkdown(line.slice(2))}</li>`);
+          continue;
+        }
+
+        closeList();
+        html.push(`<p>${inlineMarkdown(line)}</p>`);
+      }
+
+      closeList();
+
+      return html.join('');
+    }
+
+    function formatDate(value) {
+      if (!value) return '--';
+      return new Date(value).toLocaleDateString('vi-VN');
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '--';
+      return new Date(value).toLocaleString('vi-VN');
+    }
+
+    function countWords(text) {
+      return String(text || '').trim().split(/\s+/).filter(Boolean).length;
+    }
+
+    async function loadDigest() {
+      const titleEl = document.getElementById('title');
+      const metaEl = document.getElementById('meta');
+      const contentEl = document.getElementById('content');
+      const badgeEl = document.getElementById('badge');
+      const freshnessEl = document.getElementById('freshness');
+
+      titleEl.textContent = 'Đang kéo bản tin mới nhất...';
+      metaEl.textContent = '';
+      badgeEl.textContent = '📰 Đang tải';
+      freshnessEl.textContent = '⏳ Syncing';
+      contentEl.innerHTML = '<div class="loading">Đang tải dữ liệu từ DevRadar API...</div>';
+
+      try {
+        const res = await fetch('/digest/today');
+        const data = await res.json();
+
+        if (!data.ok) {
+          titleEl.textContent = 'Chưa có bản tin';
+          badgeEl.textContent = '⚠️ Empty';
+          freshnessEl.textContent = 'Chạy npm run digest';
+          contentEl.innerHTML = `<div class="error">${escapeHtml(data.message || 'Bạn hãy chạy npm run digest trước.')}</div>`;
+          document.getElementById('stat-status').textContent = 'Missing';
+          return;
+        }
+
+        const digest = data.digest;
+        const wordCount = countWords(digest.content);
+
+        badgeEl.textContent = data.isToday ? '🔥 Bản tin hôm nay' : '🗂️ Bản tin gần nhất';
+        freshnessEl.textContent = data.isToday ? 'Fresh' : 'Fallback';
+
+        titleEl.textContent = digest.title;
+        metaEl.textContent = `Ngày ${formatDate(digest.date)} · Cập nhật ${formatDateTime(digest.updatedAt)}`;
+
+        contentEl.innerHTML = renderMarkdownBasic(digest.content);
+
+        document.getElementById('stat-date').textContent = formatDate(digest.date);
+        document.getElementById('stat-status').textContent = data.isToday ? 'Today' : 'Latest';
+        document.getElementById('stat-words').textContent = wordCount;
+        document.getElementById('updated-small').textContent = formatDateTime(digest.updatedAt);
+      } catch (error) {
+        titleEl.textContent = 'Lỗi tải dữ liệu';
+        badgeEl.textContent = '❌ Error';
+        freshnessEl.textContent = 'API lỗi';
+        contentEl.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    function openJson() {
+      window.open('/digest/today', '_blank');
+    }
+
+    loadDigest();
+  </script>
+</body>
+</html>

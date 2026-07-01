@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id Int @id @default(autoincrement())
+
+  source     String
+  externalId String
+
+  title String
+  url   String
+
+  summary    String?
+  tags       String[] @default([])
+  isRelevant Boolean  @default(false)
+
+  author      String?
+  score       Int?
+  publishedAt DateTime?
+  processedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([source])
+  @@index([isRelevant])
+  @@index([createdAt])
+  @@index([publishedAt])
+}
+
+model DailyDigest {
+  id Int @id @default(autoincrement())
+
+  date    DateTime @unique
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
