@@ -10,7 +10,8 @@
     "digest": "tsx src/generate-digest.ts",
     "migrate:deploy": "prisma migrate deploy",
     "prisma:generate": "prisma generate",
-    "daily": "tsx src/run-daily.ts"
+    "daily": "tsx src/run-daily.ts",
+    "build": "prisma generate"
   },
   "keywords": [],
   "author": "",

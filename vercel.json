@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/digest/today",
+      "destination": "/api/digest-today"
+    }
+  ]
+}
