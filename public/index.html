@@ -552,7 +552,7 @@
       contentEl.innerHTML = '<div class="loading">Đang tải dữ liệu từ DevRadar API...</div>';
 
       try {
-        const res = await fetch('/digest-today');
+        const res = await fetch('/digest/today');
         const data = await res.json();
 
         if (!data.ok) {
