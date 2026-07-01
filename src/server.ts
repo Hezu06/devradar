@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import path from 'path';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -17,6 +18,10 @@ app.use(express.json());
 
 // Serve giao diện ở folder public
 app.use(express.static('public'));
+
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+});
 
 app.get('/health', (_req, res) => {
   res.json({
