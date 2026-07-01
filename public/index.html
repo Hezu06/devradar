@@ -16,6 +16,8 @@
       --yellow: #ffe45c;
       --green: #66e28a;
       --orange: #ff9f43;
+      --red: #ff6b6b;
+      --purple: #c084fc;
       --shadow: 8px 8px 0 var(--ink);
       --shadow-sm: 4px 4px 0 var(--ink);
       --radius: 18px;
@@ -46,7 +48,7 @@
     }
 
     .page {
-      width: min(1120px, calc(100% - 32px));
+      width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
       padding: 28px 0 52px;
     }
@@ -80,7 +82,7 @@
 
     .brand-title {
       margin: 0;
-      font-size: clamp(24px, 4vw, 42px);
+      font-size: clamp(28px, 4vw, 46px);
       line-height: 1;
       letter-spacing: -1.4px;
     }
@@ -88,7 +90,7 @@
     .brand-subtitle {
       margin: 4px 0 0;
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .actions {
@@ -98,19 +100,21 @@
       justify-content: flex-end;
     }
 
-    .btn {
+    .btn,
+    .tab-btn {
       border: 3px solid var(--ink);
       border-radius: 999px;
       background: var(--blue);
       color: white;
       padding: 12px 18px;
-      font-weight: 900;
+      font-weight: 950;
       cursor: pointer;
       box-shadow: var(--shadow-sm);
       transition: transform 120ms ease, box-shadow 120ms ease;
     }
 
-    .btn:hover {
+    .btn:hover,
+    .tab-btn:hover {
       transform: translate(2px, 2px);
       box-shadow: 2px 2px 0 var(--ink);
     }
@@ -166,35 +170,55 @@
       border-radius: 999px;
       background: var(--yellow);
       font-size: 13px;
-      font-weight: 900;
+      font-weight: 950;
       box-shadow: 3px 3px 0 var(--ink);
     }
 
-    .pill.blue {
-      background: #dbeafe;
-    }
-
-    .pill.green {
-      background: #dcfce7;
-    }
+    .pill.blue { background: #dbeafe; }
+    .pill.green { background: #dcfce7; }
+    .pill.pink { background: #fce7f3; }
 
     .digest-title {
       margin: 0;
-      font-size: clamp(30px, 6vw, 62px);
+      font-size: clamp(34px, 6vw, 64px);
       line-height: 0.95;
       letter-spacing: -2.2px;
-      max-width: 920px;
+      max-width: 980px;
     }
 
     .meta {
       margin-top: 18px;
       color: var(--muted);
-      font-weight: 800;
+      font-weight: 850;
     }
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 0 24px;
+    }
+
+    .tab-btn {
+      color: var(--ink);
+      background: var(--card);
+      padding: 10px 14px;
+    }
+
+    .tab-btn.active {
+      background: var(--yellow);
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .tab-btn[data-topic="tech"].active { background: #dbeafe; }
+    .tab-btn[data-topic="finance"].active { background: #dcfce7; }
+    .tab-btn[data-topic="sports"].active { background: #fef3c7; }
+    .tab-btn[data-topic="world"].active { background: #fce7f3; }
 
     .grid {
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 280px 1fr;
       gap: 24px;
       align-items: start;
     }
@@ -220,7 +244,7 @@
       gap: 10px;
       padding: 10px 0;
       border-top: 3px solid rgba(0, 0, 0, 0.18);
-      font-weight: 900;
+      font-weight: 950;
     }
 
     .content-card {
@@ -239,7 +263,7 @@
       padding: 14px 18px;
       border-bottom: 4px solid var(--ink);
       background: var(--pink);
-      font-weight: 900;
+      font-weight: 950;
     }
 
     .content {
@@ -295,32 +319,94 @@
       border-radius: 6px;
     }
 
+    .article-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .article-card {
+      border: 3px solid var(--ink);
+      border-radius: 16px;
+      background: #fffaf0;
+      box-shadow: var(--shadow-sm);
+      padding: 16px;
+    }
+
+    .article-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .article-source {
+      padding: 4px 9px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: #dbeafe;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .article-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .article-card p {
+      margin: 8px 0;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .tag {
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: var(--yellow);
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
     .loading {
       display: grid;
       place-items: center;
       min-height: 260px;
       text-align: center;
-      font-weight: 900;
+      font-weight: 950;
       font-size: 20px;
     }
 
-    .error {
+    .error,
+    .empty {
       border: 4px solid var(--ink);
       background: #fecaca;
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
-      font-weight: 900;
+      font-weight: 950;
+    }
+
+    .empty {
+      background: #fef3c7;
     }
 
     .footer {
       margin-top: 28px;
       text-align: center;
       color: var(--muted);
-      font-weight: 800;
+      font-weight: 850;
     }
 
-    @media (max-width: 820px) {
+    @media (max-width: 860px) {
       .topbar {
         align-items: flex-start;
         flex-direction: column;
@@ -354,13 +440,13 @@
         <div class="logo">📡</div>
         <div>
           <h1 class="brand-title">DevRadar</h1>
-          <p class="brand-subtitle">Daily tech signal, không đọc lan man.</p>
+          <p class="brand-subtitle">Tech · Finance · Sports · World signal, không đọc lan man.</p>
         </div>
       </div>
 
       <div class="actions">
         <button class="btn secondary" onclick="openJson()">Xem JSON</button>
-        <button class="btn" onclick="loadDigest()">Tải lại bản tin</button>
+        <button class="btn" onclick="loadDigest()">Tải lại radar</button>
       </div>
     </header>
 
@@ -371,10 +457,18 @@
           <span id="freshness" class="pill blue">⏳ Syncing</span>
         </div>
 
-        <h2 id="title" class="digest-title">Đang kéo bản tin mới nhất...</h2>
+        <h2 id="title" class="digest-title">Đang kéo Morning Radar...</h2>
         <div id="meta" class="meta"></div>
       </div>
     </section>
+
+    <nav class="tabs" aria-label="Topic tabs">
+      <button class="tab-btn active" data-topic="overview" onclick="setTab('overview')">🌅 Tổng quan</button>
+      <button class="tab-btn" data-topic="tech" onclick="setTab('tech')">💻 Công nghệ <span id="count-tech"></span></button>
+      <button class="tab-btn" data-topic="finance" onclick="setTab('finance')">📈 Chứng khoán <span id="count-finance"></span></button>
+      <button class="tab-btn" data-topic="sports" onclick="setTab('sports')">🏆 Thể thao <span id="count-sports"></span></button>
+      <button class="tab-btn" data-topic="world" onclick="setTab('world')">🌍 Thế giới <span id="count-world"></span></button>
+    </nav>
 
     <section class="grid">
       <aside class="sidebar">
@@ -384,8 +478,12 @@
           <span id="stat-date">--</span>
         </div>
         <div class="stat">
-          <span>Trạng thái</span>
-          <span id="stat-status">--</span>
+          <span>Tab</span>
+          <span id="stat-topic">Tổng quan</span>
+        </div>
+        <div class="stat">
+          <span>Items</span>
+          <span id="stat-items">--</span>
         </div>
         <div class="stat">
           <span>Độ dài</span>
@@ -395,7 +493,7 @@
 
       <article class="content-card">
         <div class="content-header">
-          <span>⚡ Today's Brief</span>
+          <span id="content-title">⚡ Morning Brief</span>
           <span id="updated-small">--</span>
         </div>
         <div id="content" class="content">
@@ -405,11 +503,23 @@
     </section>
 
     <footer class="footer">
-      Built with DevRadar · Hacker News / DEV.to / GitHub → Gemini → Daily Digest
+      Built with DevRadar · Tech / Finance / Sports / World → Gemini → Morning Radar
     </footer>
   </main>
 
   <script>
+    const API_ENDPOINTS = ['/api/digest-today', '/digest/today'];
+    const TOPIC_LABELS = {
+      overview: 'Tổng quan',
+      tech: 'Công nghệ',
+      finance: 'Chứng khoán',
+      sports: 'Thể thao',
+      world: 'Thế giới',
+    };
+
+    let appData = null;
+    let activeTab = 'overview';
+
     function escapeHtml(value) {
       return String(value)
         .replaceAll('&', '&amp;')
@@ -432,8 +542,6 @@
     function inlineMarkdown(text) {
       const links = [];
 
-      // Bước 1: tách markdown link ra placeholder trước.
-      // Nếu không làm vậy, regex raw URL sẽ ăn cả URL bên trong href và làm vỡ link.
       let source = String(text || '').replace(
         /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
         (_match, label, url) => {
@@ -445,21 +553,17 @@
         },
       );
 
-      // Bước 2: escape HTML để không inject code lạ từ API/AI.
       let safe = escapeHtml(source);
 
-      // Bước 3: inline markdown cơ bản.
       safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       safe = safe.replace(/(^|[^*])\*(?!\s)([^*]+?)\*/g, '$1<em>$2</em>');
 
-      // Bước 4: convert raw URL còn lại thành link.
       safe = safe.replace(
         /(^|[\s(])((https?:\/\/[^\s<>"')]+))/g,
         (_match, prefix, url) =>
           `${prefix}<a href="${safeUrl(url)}" target="_blank" rel="noreferrer">${escapeHtml(url)}</a>`,
       );
 
-      // Bước 5: trả markdown link placeholder về HTML anchor.
       links.forEach((anchor, index) => {
         safe = safe.replaceAll(`@@DEV_RADAR_LINK_${index}@@`, anchor);
       });
@@ -505,7 +609,7 @@
           continue;
         }
 
-        if (line.startsWith('- ')) {
+        if (line.startsWith('- ') || line.startsWith('* ')) {
           if (!inList) {
             html.push('<ul>');
             inList = true;
@@ -538,6 +642,33 @@
       return String(text || '').trim().split(/\s+/).filter(Boolean).length;
     }
 
+    async function fetchJson() {
+      const errors = [];
+
+      for (const endpoint of API_ENDPOINTS) {
+        try {
+          const res = await fetch(endpoint, {
+            headers: {
+              Accept: 'application/json',
+            },
+            cache: 'no-store',
+          });
+
+          const raw = await res.text();
+
+          try {
+            return JSON.parse(raw);
+          } catch {
+            errors.push(`${endpoint}: không trả JSON, response bắt đầu bằng ${raw.slice(0, 50)}`);
+          }
+        } catch (error) {
+          errors.push(`${endpoint}: ${error.message}`);
+        }
+      }
+
+      throw new Error(errors.join(' | '));
+    }
+
     async function loadDigest() {
       const titleEl = document.getElementById('title');
       const metaEl = document.getElementById('meta');
@@ -545,40 +676,24 @@
       const badgeEl = document.getElementById('badge');
       const freshnessEl = document.getElementById('freshness');
 
-      titleEl.textContent = 'Đang kéo bản tin mới nhất...';
+      titleEl.textContent = 'Đang kéo Morning Radar...';
       metaEl.textContent = '';
       badgeEl.textContent = '📰 Đang tải';
       freshnessEl.textContent = '⏳ Syncing';
       contentEl.innerHTML = '<div class="loading">Đang tải dữ liệu từ DevRadar API...</div>';
 
       try {
-        const res = await fetch('/digest/today');
-        const data = await res.json();
+        const data = await fetchJson();
 
         if (!data.ok) {
-          titleEl.textContent = 'Chưa có bản tin';
-          badgeEl.textContent = '⚠️ Empty';
-          freshnessEl.textContent = 'Chạy npm run digest';
-          contentEl.innerHTML = `<div class="error">${escapeHtml(data.message || 'Bạn hãy chạy npm run digest trước.')}</div>`;
-          document.getElementById('stat-status').textContent = 'Missing';
-          return;
+          throw new Error(data.message || 'API trả về trạng thái không hợp lệ.');
         }
 
-        const digest = data.digest;
-        const wordCount = countWords(digest.content);
-
-        badgeEl.textContent = data.isToday ? '🔥 Bản tin hôm nay' : '🗂️ Bản tin gần nhất';
-        freshnessEl.textContent = data.isToday ? 'Fresh' : 'Fallback';
-
-        titleEl.textContent = digest.title;
-        metaEl.textContent = `Ngày ${formatDate(digest.date)} · Cập nhật ${formatDateTime(digest.updatedAt)}`;
-
-        contentEl.innerHTML = renderMarkdownBasic(digest.content);
-
-        document.getElementById('stat-date').textContent = formatDate(digest.date);
-        document.getElementById('stat-status').textContent = data.isToday ? 'Today' : 'Latest';
-        document.getElementById('stat-words').textContent = wordCount;
-        document.getElementById('updated-small').textContent = formatDateTime(digest.updatedAt);
+        appData = data;
+        activeTab = 'overview';
+        updateHeader();
+        updateCounts();
+        renderActiveTab();
       } catch (error) {
         titleEl.textContent = 'Lỗi tải dữ liệu';
         badgeEl.textContent = '❌ Error';
@@ -587,8 +702,89 @@
       }
     }
 
+    function updateHeader() {
+      if (!appData?.digest) return;
+
+      const digest = appData.digest;
+
+      document.getElementById('badge').textContent = appData.isToday
+        ? '🔥 Bản tin hôm nay'
+        : '🗂️ Bản tin gần nhất';
+      document.getElementById('freshness').textContent = appData.isToday ? 'Fresh' : 'Fallback';
+      document.getElementById('title').textContent = digest.title;
+      document.getElementById('meta').textContent = `Ngày ${formatDate(digest.date)} · Cập nhật ${formatDateTime(digest.updatedAt)}`;
+      document.getElementById('stat-date').textContent = formatDate(digest.date);
+      document.getElementById('updated-small').textContent = formatDateTime(digest.updatedAt);
+    }
+
+    function updateCounts() {
+      const counts = appData?.topicCounts || {};
+
+      for (const topic of ['tech', 'finance', 'sports', 'world']) {
+        const el = document.getElementById(`count-${topic}`);
+        if (el) el.textContent = counts[topic] ? `(${counts[topic]})` : '';
+      }
+    }
+
+    function setTab(topic) {
+      activeTab = topic;
+      renderActiveTab();
+    }
+
+    function renderActiveTab() {
+      if (!appData) return;
+
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.topic === activeTab);
+      });
+
+      const contentEl = document.getElementById('content');
+      const digest = appData.digest;
+
+      document.getElementById('stat-topic').textContent = TOPIC_LABELS[activeTab] || activeTab;
+
+      if (activeTab === 'overview') {
+        document.getElementById('content-title').textContent = '⚡ Morning Brief';
+        document.getElementById('stat-items').textContent = appData.topics?.length || 4;
+        document.getElementById('stat-words').textContent = countWords(digest.content);
+        contentEl.innerHTML = renderMarkdownBasic(digest.content);
+        return;
+      }
+
+      const articles = appData.articlesByTopic?.[activeTab] || [];
+      document.getElementById('content-title').textContent = `📌 ${TOPIC_LABELS[activeTab]}`;
+      document.getElementById('stat-items').textContent = articles.length;
+      document.getElementById('stat-words').textContent = '--';
+
+      if (!articles.length) {
+        contentEl.innerHTML = `<div class="empty">Chưa có bài đáng đọc cho tab ${escapeHtml(TOPIC_LABELS[activeTab])}. Chạy GitHub Actions daily job để cập nhật thêm.</div>`;
+        return;
+      }
+
+      contentEl.innerHTML = `<div class="article-grid">${articles.map(renderArticleCard).join('')}</div>`;
+    }
+
+    function renderArticleCard(article) {
+      const tags = Array.isArray(article.tags) ? article.tags : [];
+      const score = article.score ?? 'n/a';
+
+      return `
+        <article class="article-card">
+          <div class="article-top">
+            <span class="article-source">${escapeHtml(article.source)} · score ${escapeHtml(score)}</span>
+            <span class="article-source">${formatDate(article.publishedAt || article.createdAt)}</span>
+          </div>
+          <h3><a href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a></h3>
+          <p>${escapeHtml(article.summary || 'Chưa có tóm tắt.')}</p>
+          <div class="tag-row">
+            ${tags.slice(0, 5).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+          </div>
+        </article>
+      `;
+    }
+
     function openJson() {
-      window.open('/digest/today', '_blank');
+      window.open(API_ENDPOINTS[0], '_blank');
     }
 
     loadDigest();

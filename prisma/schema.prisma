@@ -8,28 +8,31 @@ datasource db {
 }
 
 model Article {
-  id Int @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
 
-  source     String
-  externalId String
+  source      String
+  externalId  String
 
-  title String
-  url   String
+  topic       String   @default("tech") // tech | finance | sports | world
 
-  summary    String?
-  tags       String[] @default([])
-  isRelevant Boolean  @default(false)
+  title       String
+  url         String
+
+  summary     String?
+  tags        String[] @default([])
+  isRelevant  Boolean  @default(false)
 
   author      String?
   score       Int?
   publishedAt DateTime?
   processedAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([source, externalId])
   @@index([source])
+  @@index([topic])
   @@index([isRelevant])
   @@index([createdAt])
   @@index([publishedAt])

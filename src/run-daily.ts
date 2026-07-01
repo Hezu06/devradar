@@ -2,10 +2,6 @@ import 'dotenv/config';
 import axios from 'axios';
 import { GoogleGenAI, Type } from '@google/genai';
 import { PrismaClient } from '@prisma/client';
-import {
-  generateDailyDigest,
-  disconnectDigestService,
-} from './services/digest-service';
 
 const prisma = new PrismaClient();
 
@@ -23,13 +19,16 @@ const genAI = new GoogleGenAI({
 
 const HN_BASE_URL = 'https://hacker-news.firebaseio.com/v0';
 
-const SOURCE_LIMIT_PER_RUN = Number(process.env.SOURCE_LIMIT_PER_RUN || 10);
-const GEMINI_DELAY_MS = Number(process.env.GEMINI_DELAY_MS || 7000);
+const SOURCE_LIMIT_PER_RUN = Number(process.env.SOURCE_LIMIT_PER_RUN || 5);
+const GEMINI_DELAY_MS = Number(process.env.GEMINI_DELAY_MS || 8000);
 const USER_AGENT = process.env.USER_AGENT || 'DevRadar/1.0';
+
+type Topic = 'tech' | 'finance' | 'sports' | 'world';
 
 type RawArticle = {
   source: string;
   externalId: string;
+  topic: Topic;
   title: string;
   url: string;
   author?: string | null;
@@ -42,6 +41,11 @@ type AIResult = {
   summary: string;
   tags: string[];
   is_relevant: boolean;
+};
+
+type DigestAIResult = {
+  title: string;
+  content: string;
 };
 
 type HNStory = {
@@ -86,6 +90,19 @@ type GitHubSearchResponse = {
   items: GitHubRepo[];
 };
 
+type GdeltArticle = {
+  title?: string;
+  url?: string;
+  domain?: string;
+  seendate?: string;
+  sourceCountry?: string;
+  language?: string;
+};
+
+type GdeltResponse = {
+  articles?: GdeltArticle[];
+};
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -116,6 +133,22 @@ function getDateNDaysAgo(days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
+function parseGdeltDate(value: string | null | undefined): string | null {
+  if (!value) return null;
+
+  const direct = new Date(value);
+  if (!Number.isNaN(direct.getTime())) return direct.toISOString();
+
+  const match = value.match(/^(\d{4})(\d{2})(\d{2})T?(\d{2})(\d{2})(\d{2})Z?$/);
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, second] = match;
+  const iso = `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
+  const parsed = new Date(iso);
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
 function parseAIJson(text: string): AIResult {
   const cleaned = text
     .trim()
@@ -132,6 +165,23 @@ function parseAIJson(text: string): AIResult {
     typeof parsed.is_relevant !== 'boolean'
   ) {
     throw new Error(`Invalid AI JSON: ${cleaned}`);
+  }
+
+  return parsed;
+}
+
+function parseDigestJson(text: string): DigestAIResult {
+  const cleaned = text
+    .trim()
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  const parsed = JSON.parse(cleaned) as DigestAIResult;
+
+  if (typeof parsed.title !== 'string' || typeof parsed.content !== 'string') {
+    throw new Error(`Invalid digest JSON: ${cleaned}`);
   }
 
   return parsed;
@@ -158,12 +208,13 @@ async function fetchHackerNews(limit: number): Promise<RawArticle[]> {
     articles.push({
       source: 'hackernews',
       externalId: String(id),
+      topic: 'tech',
       title: story.title,
       url: story.url || `https://news.ycombinator.com/item?id=${id}`,
       author: story.by ?? null,
       score: story.score ?? null,
       publishedAt: story.time ? new Date(story.time * 1000).toISOString() : null,
-      sourceTags: ['hackernews'],
+      sourceTags: ['hackernews', 'tech'],
     });
   }
 
@@ -187,6 +238,7 @@ async function fetchDevTo(limit: number): Promise<RawArticle[]> {
     .map((article) => ({
       source: 'devto',
       externalId: String(article.id),
+      topic: 'tech',
       title: article.description
         ? `${article.title} — ${article.description}`
         : article.title,
@@ -242,6 +294,7 @@ async function fetchGitHub(limit: number): Promise<RawArticle[]> {
     .map((repo) => ({
       source: 'github',
       externalId: repo.full_name,
+      topic: 'tech',
       title: `${repo.full_name}${repo.description ? ` — ${repo.description}` : ''}`,
       url: repo.html_url,
       author: repo.owner.login,
@@ -251,11 +304,89 @@ async function fetchGitHub(limit: number): Promise<RawArticle[]> {
     }));
 }
 
+async function fetchGdeltTopic(
+  topic: Topic,
+  source: string,
+  query: string,
+  tags: string[],
+  limit: number,
+): Promise<RawArticle[]> {
+  const response = await axios.get<GdeltResponse>('https://api.gdeltproject.org/api/v2/doc/doc', {
+    params: {
+      query,
+      mode: 'artlist',
+      format: 'json',
+      maxrecords: limit,
+      timespan: '24h',
+      sort: 'hybridrel',
+    },
+    headers: {
+      'User-Agent': USER_AGENT,
+    },
+    timeout: 20_000,
+  });
+
+  const articles = response.data.articles ?? [];
+  const seen = new Set<string>();
+
+  return articles
+    .filter((item) => item.title && item.url)
+    .filter((item) => {
+      if (!item.url) return false;
+      if (seen.has(item.url)) return false;
+      seen.add(item.url);
+      return true;
+    })
+    .slice(0, limit)
+    .map((item) => ({
+      source,
+      externalId: item.url as string,
+      topic,
+      title: item.title as string,
+      url: item.url as string,
+      author: item.domain ?? null,
+      score: null,
+      publishedAt: parseGdeltDate(item.seendate),
+      sourceTags: [...tags, item.sourceCountry, item.language].filter(Boolean) as string[],
+    }));
+}
+
+async function fetchFinanceNews(limit: number): Promise<RawArticle[]> {
+  return fetchGdeltTopic(
+    'finance',
+    'gdelt-finance',
+    '(stock market OR Nasdaq OR "S&P 500" OR inflation OR "Federal Reserve" OR earnings OR "Wall Street" OR economy)',
+    ['finance', 'stocks', 'economy'],
+    limit,
+  );
+}
+
+async function fetchSportsHotNews(limit: number): Promise<RawArticle[]> {
+  return fetchGdeltTopic(
+    'sports',
+    'gdelt-sports',
+    '(football OR soccer OR basketball OR tennis OR olympics OR NBA OR "Premier League" OR "World Cup")',
+    ['sports', 'global'],
+    limit,
+  );
+}
+
+async function fetchWorldHotNews(limit: number): Promise<RawArticle[]> {
+  return fetchGdeltTopic(
+    'world',
+    'gdelt-world',
+    '(breaking news OR election OR earthquake OR climate OR war OR diplomacy OR "global economy" OR crisis)',
+    ['world', 'global', 'hot'],
+    limit,
+  );
+}
+
 async function analyzeArticle(article: RawArticle): Promise<AIResult> {
   const prompt = `
-Bạn là trợ lý lọc tin công nghệ cho dự án DevRadar.
+Bạn là trợ lý lọc thông tin cho dự án DevRadar.
 
-Hãy đánh giá bài viết / repo sau:
+Hãy đánh giá item sau:
+- Topic: ${article.topic}
 - Source: ${article.source}
 - Title: ${article.title}
 - URL: ${article.url}
@@ -267,8 +398,13 @@ Hãy đánh giá bài viết / repo sau:
 Nhiệm vụ:
 1. Tóm tắt trong 1 câu tiếng Việt, dễ hiểu.
 2. Gắn 2-5 tag ngắn.
-3. is_relevant = true nếu đáng đọc với người theo dõi Backend, AI, Web Dev, Database, DevOps, Security, Open Source hoặc xu hướng công nghệ.
-4. false nếu quá ngoài lề, tuyển dụng không liên quan, drama, hoặc không có giá trị công nghệ rõ ràng.
+3. is_relevant = true nếu item đáng đọc trong topic tương ứng:
+   - tech: AI, Backend, Web Dev, Database, DevOps, Security, Open Source
+   - finance: chứng khoán, kinh tế vĩ mô, doanh nghiệp lớn, lãi suất, crypto lớn, thị trường
+   - sports: kết quả/lịch/trận đấu lớn, chuyển nhượng lớn, giải đấu lớn, vận động viên nổi bật
+   - world: sự kiện nóng toàn cầu, chính trị quốc tế, kinh tế, khí hậu, thiên tai, xung đột, khoa học
+4. false nếu quá ngoài lề, câu view, drama nhỏ, quảng cáo, tuyển dụng không liên quan.
+5. Với finance, không đưa khuyến nghị mua/bán.
 
 Chỉ trả về JSON đúng schema.
 `;
@@ -324,6 +460,7 @@ async function saveArticle(article: RawArticle, aiResult: AIResult): Promise<'cr
     data: {
       source: article.source,
       externalId: article.externalId,
+      topic: article.topic,
       title: article.title,
       url: article.url,
       author: article.author ?? null,
@@ -342,19 +479,13 @@ async function saveArticle(article: RawArticle, aiResult: AIResult): Promise<'cr
 async function collectArticles(): Promise<void> {
   console.log(`📥 Bắt đầu collect ${SOURCE_LIMIT_PER_RUN} bài / nguồn...`);
 
-  const sources = [
-    {
-      name: 'hackernews',
-      fetch: fetchHackerNews,
-    },
-    {
-      name: 'devto',
-      fetch: fetchDevTo,
-    },
-    {
-      name: 'github',
-      fetch: fetchGitHub,
-    },
+  const sources: Array<{ name: string; fetch: (limit: number) => Promise<RawArticle[]> }> = [
+    { name: 'hackernews', fetch: fetchHackerNews },
+    { name: 'devto', fetch: fetchDevTo },
+    { name: 'github', fetch: fetchGitHub },
+    { name: 'finance', fetch: fetchFinanceNews },
+    { name: 'sports', fetch: fetchSportsHotNews },
+    { name: 'world', fetch: fetchWorldHotNews },
   ];
 
   let totalCreated = 0;
@@ -364,7 +495,15 @@ async function collectArticles(): Promise<void> {
   for (const source of sources) {
     console.log(`\n🔎 Đang lấy nguồn: ${source.name}`);
 
-    const articles = await source.fetch(SOURCE_LIMIT_PER_RUN);
+    let articles: RawArticle[] = [];
+
+    try {
+      articles = await source.fetch(SOURCE_LIMIT_PER_RUN);
+    } catch (error) {
+      totalFailed += 1;
+      console.error(`❌ Lỗi lấy nguồn ${source.name}:`, error);
+      continue;
+    }
 
     console.log(`→ Lấy được ${articles.length} items từ ${source.name}`);
 
@@ -380,29 +519,27 @@ async function collectArticles(): Promise<void> {
 
       if (exists) {
         totalSkipped += 1;
-        console.log(`⏩ Bỏ qua đã có DB: [${article.source}] ${article.title}`);
+        console.log(`⏩ Bỏ qua đã có DB: [${article.topic}/${article.source}] ${article.title}`);
         continue;
       }
 
       try {
-        console.log(`⚙️ AI xử lý: [${article.source}] ${article.title}`);
+        console.log(`⚙️ AI xử lý: [${article.topic}/${article.source}] ${article.title}`);
 
         const aiResult = await analyzeArticle(article);
         const status = await saveArticle(article, aiResult);
 
         if (status === 'created') {
           totalCreated += 1;
-          console.log(`✅ Đã lưu: [${article.source}] ${article.title}`);
+          console.log(`✅ Đã lưu: [${article.topic}/${article.source}] ${article.title}`);
         } else {
           totalSkipped += 1;
         }
       } catch (error) {
         totalFailed += 1;
-        console.error(`❌ Lỗi item [${article.source}] ${article.title}:`, error);
+        console.error(`❌ Lỗi item [${article.topic}/${article.source}] ${article.title}:`, error);
       }
 
-      // Chống Gemini free tier rate limit.
-      // 7000ms ≈ 8-9 requests/phút, thấp hơn mức 15 rpm trong log lỗi của bạn.
       await sleep(GEMINI_DELAY_MS);
     }
   }
@@ -413,13 +550,138 @@ async function collectArticles(): Promise<void> {
   console.log(`Failed : ${totalFailed}`);
 }
 
+function getStartOfToday(): Date {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function getLookbackDate(): Date {
+  const hours = Number(process.env.DIGEST_LOOKBACK_HOURS || 24);
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
+}
+
+async function generateMultiTopicDigest() {
+  const today = getStartOfToday();
+  const since = getLookbackDate();
+  const maxArticles = Number(process.env.DIGEST_MAX_ARTICLES || 80);
+
+  const articles = await prisma.article.findMany({
+    where: {
+      isRelevant: true,
+      createdAt: {
+        gte: since,
+      },
+    },
+    orderBy: [
+      { topic: 'asc' },
+      { score: 'desc' },
+      { createdAt: 'desc' },
+    ],
+    take: maxArticles,
+  });
+
+  if (articles.length === 0) {
+    throw new Error('Không có article phù hợp để tạo digest.');
+  }
+
+  const articleText = articles
+    .map((article, index) => {
+      return `
+${index + 1}.
+Topic: ${article.topic}
+Source: ${article.source}
+Title: ${article.title}
+URL: ${article.url}
+Summary: ${article.summary ?? 'Chưa có summary'}
+Tags: ${article.tags.join(', ')}
+Score: ${article.score ?? 'unknown'}
+Author: ${article.author ?? 'unknown'}
+Published At: ${article.publishedAt?.toISOString() ?? 'unknown'}
+`;
+    })
+    .join('\n');
+
+  const prompt = `
+Bạn là biên tập viên cho DevRadar.
+
+Dưới đây là danh sách thông tin đã lọc trong 24h qua:
+
+${articleText}
+
+Hãy tạo bản tin tiếng Việt dạng "Morning Radar".
+
+Yêu cầu:
+- Chia thành 4 phần nếu có dữ liệu:
+  1. Công nghệ
+  2. Chứng khoán & Kinh tế
+  3. Thể thao
+  4. Tin nóng toàn cầu
+- Mỗi phần chọn 3-5 mục quan trọng nhất.
+- Mỗi mục có: tiêu đề, tóm tắt, vì sao đáng chú ý, link.
+- Với chứng khoán: chỉ tóm tắt thông tin, không khuyến nghị mua/bán.
+- Không bịa thêm thông tin ngoài dữ liệu đã cho.
+- Nội dung content dùng Markdown.
+- Trả về JSON đúng schema:
+{
+  "title": "Tiêu đề bản tin",
+  "content": "Nội dung Markdown"
+}
+`;
+
+  const response = await genAI.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          title: { type: Type.STRING },
+          content: { type: Type.STRING },
+        },
+        required: ['title', 'content'],
+      },
+    },
+  });
+
+  if (!response.text) {
+    throw new Error('Gemini returned empty digest response');
+  }
+
+  const result = parseDigestJson(response.text);
+
+  const digest = await prisma.dailyDigest.upsert({
+    where: {
+      date: today,
+    },
+    update: {
+      title: result.title,
+      content: result.content,
+    },
+    create: {
+      date: today,
+      title: result.title,
+      content: result.content,
+    },
+  });
+
+  return {
+    digest,
+    articleCount: articles.length,
+  };
+}
+
 async function main() {
   console.log('🚀 DevRadar daily run bắt đầu...');
 
   await collectArticles();
 
-  console.log('\n📰 Đang tạo Daily Digest...');
-  const digestResult = await generateDailyDigest();
+  console.log('\n⏳ Nghỉ một chút trước khi tạo Digest để tránh rate limit...');
+  await sleep(GEMINI_DELAY_MS);
+
+  console.log('\n📰 Đang tạo Morning Radar đa chủ đề...');
+  const digestResult = await generateMultiTopicDigest();
 
   console.log(`✅ Đã tạo digest từ ${digestResult.articleCount} articles.`);
   console.log(`Title: ${digestResult.digest.title}`);
@@ -434,5 +696,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    await disconnectDigestService();
   });
