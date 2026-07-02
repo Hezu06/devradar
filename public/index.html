@@ -35,7 +35,7 @@
         "Be Vietnam Pro", "Segoe UI", Tahoma, Arial, sans-serif;
       text-rendering: geometricPrecision;
       -webkit-font-smoothing: antialiased;
-      font-synthesis-weight: none;
+      font-synthesis: none;
       background:
         radial-gradient(circle at 10% 10%, rgba(255, 92, 168, 0.22), transparent 24%),
         radial-gradient(circle at 90% 18%, rgba(79, 124, 255, 0.22), transparent 28%),
@@ -187,9 +187,10 @@
     .digest-title {
       margin: 0;
       font-size: clamp(34px, 6vw, 64px);
-      line-height: 0.95;
-      letter-spacing: -1.2px;
+      line-height: 1.08;
+      letter-spacing: -0.9px;
       max-width: 980px;
+      font-weight: 900;
     }
 
     .meta {
@@ -199,16 +200,59 @@
     }
 
     .tabs {
+      position: sticky;
+      top: 10px;
+      z-index: 30;
       display: flex;
       gap: 12px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       margin: 0 0 24px;
+      padding: 10px 4px 14px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255, 244, 214, 0.96),
+          rgba(254, 243, 199, 0.92)
+        );
+      backdrop-filter: blur(10px);
+      border-radius: 999px;
     }
 
     .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
       color: var(--ink);
       background: var(--card);
-      padding: 10px 14px;
+      padding: 10px 16px;
+      font-family: "Be Vietnam Pro", "Segoe UI", Tahoma, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .tab-emoji {
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .tab-text,
+    .tab-count {
+      display: inline-block;
+      transform: translateY(0.5px);
+    }
+
+    .tab-count {
+      opacity: 0.72;
+      font-weight: 800;
     }
 
     .tab-btn.active {
@@ -328,59 +372,67 @@
 
     .article-grid {
       display: grid;
-      gap: 16px;
+      gap: 14px;
     }
 
     .article-card {
       border: 3px solid var(--ink);
-      border-radius: 16px;
-      background: #fffaf0;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #fffaf0 100%);
       box-shadow: var(--shadow-sm);
-      padding: 16px;
+      padding: 18px;
+      transition: transform 140ms ease, box-shadow 140ms ease;
     }
 
-    .article-top {
+    .article-card:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .article-card h3 {
+      margin: 0;
+      font-size: clamp(17px, 2vw, 22px);
+      line-height: 1.35;
+      letter-spacing: -0.2px;
+      font-weight: 850;
+    }
+
+    .article-actions {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      margin-top: 14px;
     }
 
-    .article-source {
-      padding: 4px 9px;
-      border: 2px solid var(--ink);
-      border-radius: 999px;
-      background: #dbeafe;
+    .article-source-mini {
+      color: var(--muted);
       font-size: 12px;
-      font-weight: 900;
+      font-weight: 800;
     }
 
-    .article-card h3 {
-      margin: 0 0 8px;
-      font-size: 20px;
-      line-height: 1.25;
-    }
-
-    .article-card p {
-      margin: 8px 0;
-    }
-
-    .tag-row {
-      display: flex;
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .tag {
-      border: 2px solid var(--ink);
+      border: 3px solid var(--ink);
       border-radius: 999px;
       background: var(--yellow);
-      padding: 2px 8px;
-      font-size: 12px;
+      color: var(--ink);
+      padding: 8px 13px;
+      font-size: 13px;
       font-weight: 900;
+      text-decoration: none;
+      box-shadow: 3px 3px 0 var(--ink);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .detail-link:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--ink);
     }
 
     .loading {
@@ -436,6 +488,20 @@
         padding-left: 20px;
         padding-right: 20px;
       }
+
+      .tabs {
+        top: 0;
+        border-radius: 0 0 18px 18px;
+        margin-left: -16px;
+        margin-right: -16px;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .tab-btn {
+        font-size: 13px;
+        padding: 9px 13px;
+      }
     }
   </style>
 </head>
@@ -470,11 +536,21 @@
     </section>
 
     <nav class="tabs" aria-label="Topic tabs">
-      <button class="tab-btn active" data-topic="overview" onclick="setTab('overview')">🌅 Tổng quan</button>
-      <button class="tab-btn" data-topic="tech" onclick="setTab('tech')">💻 Công nghệ <span id="count-tech"></span></button>
-      <button class="tab-btn" data-topic="finance" onclick="setTab('finance')">📈 Chứng khoán <span id="count-finance"></span></button>
-      <button class="tab-btn" data-topic="sports" onclick="setTab('sports')">🏆 Thể thao <span id="count-sports"></span></button>
-      <button class="tab-btn" data-topic="world" onclick="setTab('world')">🌍 Thế giới <span id="count-world"></span></button>
+      <button class="tab-btn active" data-topic="overview" onclick="setTab('overview')">
+        <span class="tab-emoji">🌅</span><span class="tab-text">Tổng quan</span>
+      </button>
+      <button class="tab-btn" data-topic="tech" onclick="setTab('tech')">
+        <span class="tab-emoji">💻</span><span class="tab-text">Công nghệ</span><span class="tab-count" id="count-tech"></span>
+      </button>
+      <button class="tab-btn" data-topic="finance" onclick="setTab('finance')">
+        <span class="tab-emoji">📈</span><span class="tab-text">Chứng khoán</span><span class="tab-count" id="count-finance"></span>
+      </button>
+      <button class="tab-btn" data-topic="sports" onclick="setTab('sports')">
+        <span class="tab-emoji">🏆</span><span class="tab-text">Thể thao</span><span class="tab-count" id="count-sports"></span>
+      </button>
+      <button class="tab-btn" data-topic="world" onclick="setTab('world')">
+        <span class="tab-emoji">🌍</span><span class="tab-text">Thế giới</span><span class="tab-count" id="count-world"></span>
+      </button>
     </nav>
 
     <section class="grid">
@@ -515,7 +591,7 @@
   </main>
 
   <script>
-    const API_ENDPOINTS = ['/digest/today'];
+    const API_ENDPOINTS = ['/api/digest-today', '/digest/today'];
     const TOPIC_LABELS = {
       overview: 'Tổng quan',
       tech: 'Công nghệ',
@@ -729,7 +805,7 @@
 
       for (const topic of ['tech', 'finance', 'sports', 'world']) {
         const el = document.getElementById(`count-${topic}`);
-        if (el) el.textContent = counts[topic] ? `(${counts[topic]})` : '';
+        if (el) el.textContent = counts[topic] ? String(counts[topic]) : '';
       }
     }
 
@@ -772,19 +848,17 @@
     }
 
     function renderArticleCard(article) {
-      const tags = Array.isArray(article.tags) ? article.tags : [];
-      const score = article.score ?? 'n/a';
+      const source = article.source || activeTab;
+      const date = formatDate(article.publishedAt || article.createdAt);
 
       return `
         <article class="article-card">
-          <div class="article-top">
-            <span class="article-source">${escapeHtml(article.source)} · score ${escapeHtml(score)}</span>
-            <span class="article-source">${formatDate(article.publishedAt || article.createdAt)}</span>
-          </div>
-          <h3><a href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">${escapeHtml(article.title)}</a></h3>
-          <p>${escapeHtml(article.summary || 'Chưa có tóm tắt.')}</p>
-          <div class="tag-row">
-            ${tags.slice(0, 5).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+          <h3>${escapeHtml(article.title)}</h3>
+          <div class="article-actions">
+            <span class="article-source-mini">${escapeHtml(source)} · ${escapeHtml(date)}</span>
+            <a class="detail-link" href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">
+              Xem chi tiết <span aria-hidden="true">↗</span>
+            </a>
           </div>
         </article>
       `;
