@@ -458,7 +458,8 @@ async function fetchGitHub(limit: number): Promise<RawArticle[]> {
       author: repo.owner.login,
       score: repo.stargazers_count,
       publishedAt: repo.pushed_at || repo.updated_at || null,
-      imageUrl: `https://opengraph.githubassets.com/devradar/${repo.full_name}`,
+      // GitHub OpenGraph cards are text-heavy, so the frontend uses a clean fallback block instead.
+      imageUrl: null,
       sourceTags: repo.topics ?? ['github', 'open-source'],
     }));
 }

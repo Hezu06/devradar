@@ -445,17 +445,21 @@
 
     .article-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
       gap: 18px;
     }
 
     .article-card {
       position: relative;
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      gap: 0;
       overflow: hidden;
-      border: 2px solid color-mix(in srgb, var(--line) 80%, transparent);
+      border: 2px solid color-mix(in srgb, var(--line) 78%, transparent);
       border-radius: 22px;
       background: var(--card);
       box-shadow: var(--shadow-sm);
+      min-height: 172px;
       transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
     }
 
@@ -465,46 +469,67 @@
     }
 
     .article-media {
-      height: 150px;
-      border-bottom: 2px solid color-mix(in srgb, var(--line) 35%, transparent);
+      width: 132px;
+      min-height: 100%;
+      border-right: 2px solid color-mix(in srgb, var(--line) 34%, transparent);
       background:
-        radial-gradient(circle at 24% 18%, color-mix(in srgb, var(--accent-3) 46%, transparent), transparent 30%),
-        radial-gradient(circle at 76% 22%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 34%),
+        radial-gradient(circle at 24% 18%, color-mix(in srgb, var(--accent-3) 42%, transparent), transparent 32%),
+        radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 34%),
         linear-gradient(135deg, color-mix(in srgb, var(--card-2) 76%, var(--accent)), var(--card-2));
       display: grid;
       place-items: center;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
       letter-spacing: 0.08em;
+      text-align: center;
       text-transform: uppercase;
+      padding: 12px;
     }
 
     .article-media img {
       width: 100%;
       height: 100%;
+      min-height: 172px;
       object-fit: cover;
+      object-position: center;
       display: block;
     }
 
+    .article-card.no-image {
+      grid-template-columns: 1fr;
+    }
+
+    .article-card.no-image .article-media {
+      display: none;
+    }
+
     .article-body {
-      padding: 16px;
+      position: relative;
+      z-index: 1;
+      padding: 17px 17px 16px;
+      min-width: 0;
     }
 
     .article-card h3 {
       margin: 0;
-      font-size: clamp(17px, 1.7vw, 21px);
-      line-height: 1.35;
-      letter-spacing: -0.15px;
+      color: var(--ink);
+      font-size: clamp(17px, 1.6vw, 21px);
+      line-height: 1.34;
+      letter-spacing: -0.18px;
       font-weight: 850;
+      background: transparent;
+      padding: 0;
+      border: 0;
+      box-shadow: none;
     }
 
     .article-desc {
-      margin: 10px 0 0;
+      margin: 9px 0 0;
       color: var(--muted);
       font-size: 14px;
       font-weight: 650;
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
     .article-meta {
@@ -573,6 +598,28 @@
     .detail-link:hover {
       transform: translate(2px, 2px);
       box-shadow: 0 0 0 color-mix(in srgb, var(--line) 90%, #000000);
+    }
+
+    @media (max-width: 720px) {
+      .article-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .article-card {
+        grid-template-columns: 1fr;
+      }
+
+      .article-media {
+        width: 100%;
+        height: 168px;
+        min-height: 168px;
+        border-right: 0;
+        border-bottom: 2px solid color-mix(in srgb, var(--line) 34%, transparent);
+      }
+
+      .article-media img {
+        min-height: 168px;
+      }
     }
 
     .back-to-top {
@@ -823,6 +870,12 @@
         .replaceAll("'", '&#039;');
     }
 
+    function decodeHtmlEntities(value) {
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = String(value || '');
+      return textarea.value;
+    }
+
     function safeUrl(url) {
       const value = String(url || '').trim();
       if (!/^https?:\/\//i.test(value)) return '#';
@@ -830,10 +883,11 @@
     }
 
     function getPlainText(value) {
-      return String(value || '')
+      return decodeHtmlEntities(String(value || ''))
         .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1')
         .replace(/\*\*/g, '')
         .replace(/\*/g, '')
+        .replace(/<[^>]+>/g, '')
         .replace(/\s+/g, ' ')
         .trim();
     }
@@ -1132,7 +1186,25 @@
     }
 
     function getArticleImage(article) {
-      return article.imageUrl || article.image || article.thumbnail || article.coverImage || null;
+      const source = String(article.source || '').toLowerCase();
+      const topic = String(article.topic || '').toLowerCase();
+      const image = article.imageUrl || article.image || article.thumbnail || article.coverImage || null;
+
+      // GitHub OpenGraph images are usually text-heavy repo cards, so they make the UI look cluttered.
+      // The fallback topic block looks cleaner for repos.
+      if (source.includes('github')) return null;
+
+      if (!image) return null;
+
+      const url = String(image);
+      if (!/^https?:\/\//i.test(url)) return null;
+
+      // Avoid generated text cards/logos that usually look bad as thumbnails.
+      if (/opengraph\.githubassets\.com|githubusercontent\.com\/.*\/social-preview/i.test(url)) {
+        return null;
+      }
+
+      return url;
     }
 
     function getArticleTitle(article, lang) {
@@ -1169,14 +1241,12 @@
       const imageLabel = TOPIC_EN[article.topic] || 'Radar';
 
       return `
-        <article class="article-card">
-          <div class="article-media">
-            ${
-              image
-                ? `<img src="${safeUrl(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove(); this.parentElement.textContent='${escapeHtml(imageLabel)}';" />`
-                : `<span>${escapeHtml(imageLabel)}</span>`
-            }
-          </div>
+        <article class="article-card ${image ? 'has-image' : 'no-image'}">
+          ${
+            image
+              ? `<div class="article-media"><img src="${safeUrl(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.article-card').classList.add('no-image'); this.closest('.article-media').remove();" /></div>`
+              : `<div class="article-media"><span>${escapeHtml(imageLabel)}</span></div>`
+          }
           <div class="article-body">
             <h3>${escapeHtml(title)}</h3>
             <p class="article-desc">${escapeHtml(description)}</p>
