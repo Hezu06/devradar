@@ -445,21 +445,17 @@
 
     .article-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 18px;
     }
 
     .article-card {
       position: relative;
-      display: grid;
-      grid-template-columns: 132px 1fr;
-      gap: 0;
       overflow: hidden;
       border: 2px solid color-mix(in srgb, var(--line) 78%, transparent);
       border-radius: 22px;
       background: var(--card);
       box-shadow: var(--shadow-sm);
-      min-height: 172px;
       transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
     }
 
@@ -469,9 +465,10 @@
     }
 
     .article-media {
-      width: 132px;
-      min-height: 100%;
-      border-right: 2px solid color-mix(in srgb, var(--line) 34%, transparent);
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-bottom: 2px solid color-mix(in srgb, var(--line) 35%, transparent);
       background:
         radial-gradient(circle at 24% 18%, color-mix(in srgb, var(--accent-3) 42%, transparent), transparent 32%),
         radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 34%),
@@ -479,20 +476,17 @@
       display: grid;
       place-items: center;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 900;
       letter-spacing: 0.08em;
-      text-align: center;
       text-transform: uppercase;
-      padding: 12px;
     }
 
     .article-media img {
       width: 100%;
       height: 100%;
-      min-height: 172px;
       object-fit: cover;
-      object-position: center;
+      object-position: center center;
       display: block;
     }
 
@@ -505,31 +499,24 @@
     }
 
     .article-body {
-      position: relative;
-      z-index: 1;
-      padding: 17px 17px 16px;
-      min-width: 0;
+      padding: 16px;
     }
 
     .article-card h3 {
       margin: 0;
       color: var(--ink);
-      font-size: clamp(17px, 1.6vw, 21px);
+      font-size: clamp(18px, 1.8vw, 22px);
       line-height: 1.34;
       letter-spacing: -0.18px;
       font-weight: 850;
-      background: transparent;
-      padding: 0;
-      border: 0;
-      box-shadow: none;
     }
 
     .article-desc {
-      margin: 9px 0 0;
+      margin: 10px 0 0;
       color: var(--muted);
       font-size: 14px;
       font-weight: 650;
-      line-height: 1.55;
+      line-height: 1.58;
     }
 
     .article-meta {
@@ -1185,22 +1172,56 @@
       contentEl.innerHTML = `<div class="article-grid">${articles.map(renderArticleCard).join('')}</div>`;
     }
 
+    function validateCardImage(img) {
+      if (!img) return;
+
+      const width = img.naturalWidth || 0;
+      const height = img.naturalHeight || 0;
+
+      if (!width || !height) {
+        removeBadImage(img);
+        return;
+      }
+
+      const ratio = width / height;
+
+      const tooSmall = width < 300 || height < 300;
+      const tooTall = ratio < 0.65;
+      const tooWide = ratio > 1.8;
+
+      if (tooSmall || tooTall || tooWide) {
+        removeBadImage(img);
+      }
+    }
+
+    function removeBadImage(img) {
+      const card = img.closest('.article-card');
+      const media = img.closest('.article-media');
+
+      if (media) media.remove();
+      if (card) card.classList.add('no-image');
+    }
+
     function getArticleImage(article) {
       const source = String(article.source || '').toLowerCase();
-      const topic = String(article.topic || '').toLowerCase();
       const image = article.imageUrl || article.image || article.thumbnail || article.coverImage || null;
-
-      // GitHub OpenGraph images are usually text-heavy repo cards, so they make the UI look cluttered.
-      // The fallback topic block looks cleaner for repos.
-      if (source.includes('github')) return null;
 
       if (!image) return null;
 
-      const url = String(image);
+      const url = String(image).trim();
       if (!/^https?:\/\//i.test(url)) return null;
 
-      // Avoid generated text cards/logos that usually look bad as thumbnails.
-      if (/opengraph\.githubassets\.com|githubusercontent\.com\/.*\/social-preview/i.test(url)) {
+      // Bỏ ảnh kiểu social card / github opengraph / preview text-heavy
+      if (
+        /opengraph\.githubassets\.com/i.test(url) ||
+        /social-preview/i.test(url) ||
+        /default/i.test(url)
+      ) {
+        return null;
+      }
+
+      // GitHub repo thì thường không nên dùng ảnh
+      if (source.includes('github')) {
         return null;
       }
 
@@ -1244,22 +1265,41 @@
         <article class="article-card ${image ? 'has-image' : 'no-image'}">
           ${
             image
-              ? `<div class="article-media"><img src="${safeUrl(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.article-card').classList.add('no-image'); this.closest('.article-media').remove();" /></div>`
-              : `<div class="article-media"><span>${escapeHtml(imageLabel)}</span></div>`
+              ? `
+                <div class="article-media">
+                  <img
+                    src="${safeUrl(image)}"
+                    alt=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer"
+                    onload="validateCardImage(this)"
+                    onerror="removeBadImage(this)"
+                  />
+                </div>
+              `
+              : `
+                <div class="article-media">
+                  <span>${escapeHtml(imageLabel)}</span>
+                </div>
+              `
           }
+
           <div class="article-body">
             <h3>${escapeHtml(title)}</h3>
             <p class="article-desc">${escapeHtml(description)}</p>
+
             <div class="article-meta">
               <span>${escapeHtml(source)}</span>
               <span>·</span>
               <span>${escapeHtml(date)}</span>
             </div>
+
             <div class="article-bottom">
               <div class="lang-switch" aria-label="Chọn ngôn ngữ bài viết">
                 <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" type="button" data-lang="vi" data-article-id="${escapeHtml(id)}">VI</button>
                 <button class="lang-btn ${lang === 'en' ? 'active' : ''}" type="button" data-lang="en" data-article-id="${escapeHtml(id)}">EN</button>
               </div>
+
               <a class="detail-link" href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">
                 Xem chi tiết <span aria-hidden="true">↗</span>
               </a>
@@ -1268,7 +1308,7 @@
         </article>
       `;
     }
-
+    
     function handleContentClick(event) {
       const langButton = event.target.closest('.lang-btn');
       if (!langButton) return;
