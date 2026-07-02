@@ -7,6 +7,7 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
+
     :root {
       --bg: #fff4d6;
       --ink: #111111;
@@ -20,7 +21,7 @@
       --orange: #ff9f43;
       --red: #ff6b6b;
       --purple: #c084fc;
-      --rail-bg: rgba(255, 244, 214, 0.92);
+      --rail-bg: rgba(255, 244, 214, 0.94);
       --shadow: 8px 8px 0 var(--ink);
       --shadow-sm: 4px 4px 0 var(--ink);
       --radius: 18px;
@@ -32,18 +33,17 @@
       --muted: #cbd5e1;
       --card: #1f2937;
       --card-soft: #111827;
-      --blue: #7aa2ff;
-      --pink: #ff74b7;
-      --yellow: #ffe45c;
-      --green: #5ee58a;
-      --orange: #fbbf24;
+      --blue: #93c5fd;
+      --pink: #f472b6;
+      --yellow: #fde047;
+      --green: #86efac;
+      --orange: #fdba74;
       --red: #fb7185;
-      --purple: #c084fc;
-      --rail-bg: rgba(17, 24, 39, 0.88);
+      --purple: #c4b5fd;
+      --rail-bg: rgba(17, 24, 39, 0.90);
       --shadow: 8px 8px 0 #000000;
       --shadow-sm: 4px 4px 0 #000000;
     }
-
 
     * {
       box-sizing: border-box;
@@ -57,8 +57,8 @@
       -webkit-font-smoothing: antialiased;
       font-synthesis: none;
       background:
-        radial-gradient(circle at 10% 10%, rgba(255, 92, 168, 0.22), transparent 24%),
-        radial-gradient(circle at 90% 18%, rgba(79, 124, 255, 0.22), transparent 28%),
+        radial-gradient(circle at 10% 10%, rgba(255, 92, 168, 0.20), transparent 24%),
+        radial-gradient(circle at 90% 18%, rgba(79, 124, 255, 0.20), transparent 28%),
         linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 78%, var(--yellow)) 100%);
       color: var(--ink);
       line-height: 1.65;
@@ -208,10 +208,9 @@
     .digest-title {
       margin: 0;
       font-size: clamp(34px, 6vw, 64px);
-      line-height: 1.08;
-      letter-spacing: -0.9px;
+      line-height: 0.95;
+      letter-spacing: -1.2px;
       max-width: 980px;
-      font-weight: 900;
     }
 
     .meta {
@@ -220,48 +219,45 @@
       font-weight: 800;
     }
 
-    .tabs {
+    .topic-rail {
       position: fixed;
       left: 18px;
       top: 50%;
       transform: translateY(-50%);
-      z-index: 50;
+      z-index: 80;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      width: 56px;
-      padding: 12px 8px;
+      gap: 9px;
+      width: 58px;
+      padding: 12px 9px;
       overflow: hidden;
       border: 4px solid var(--ink);
       border-radius: 999px;
       background: var(--rail-bg);
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
-      transition:
-        width 240ms ease,
-        border-radius 240ms ease,
-        padding 240ms ease,
-        background 180ms ease;
+      transition: width 240ms ease, border-radius 240ms ease, padding 240ms ease, background 180ms ease;
     }
 
-    .tabs:hover,
-    .tabs:focus-within {
-      width: 238px;
+    .topic-rail:hover,
+    .topic-rail:focus-within {
+      width: 244px;
       border-radius: 24px;
       padding: 12px;
     }
 
-    .tab-btn {
+    .rail-btn {
       display: grid;
       grid-template-columns: 28px 1fr auto;
       align-items: center;
-      gap: 9px;
+      gap: 10px;
       width: 100%;
-      min-width: 36px;
       min-height: 42px;
-      color: var(--ink);
+      border: 3px solid var(--ink);
+      border-radius: 999px;
       background: var(--card);
-      padding: 8px 10px;
+      color: var(--ink);
+      padding: 8px 9px;
       font-family: "Be Vietnam Pro", "Segoe UI", Tahoma, Arial, sans-serif;
       font-size: 14px;
       font-weight: 800;
@@ -269,33 +265,48 @@
       letter-spacing: 0;
       white-space: nowrap;
       text-align: left;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
     }
 
-    .tab-emoji {
-      display: grid;
-      place-items: center;
+    .rail-btn:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 #000000;
+    }
+
+    .rail-mark {
+      display: block;
       width: 24px;
-      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-      font-size: 15px;
-      line-height: 1;
+      height: 6px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      background: var(--yellow);
+      box-shadow: 2px 2px 0 #000000;
     }
 
-    .tab-text,
-    .tab-count {
+    .mark-overview { background: var(--yellow); }
+    .mark-tech { background: #bfdbfe; }
+    .mark-finance { background: #bbf7d0; }
+    .mark-sports { background: #fed7aa; }
+    .mark-world { background: #fbcfe8; }
+
+    .rail-text,
+    .rail-count {
       opacity: 0;
       transform: translateX(-8px);
       transition: opacity 180ms ease, transform 180ms ease;
     }
 
-    .tabs:hover .tab-text,
-    .tabs:hover .tab-count,
-    .tabs:focus-within .tab-text,
-    .tabs:focus-within .tab-count {
+    .topic-rail:hover .rail-text,
+    .topic-rail:hover .rail-count,
+    .topic-rail:focus-within .rail-text,
+    .topic-rail:focus-within .rail-count {
       opacity: 1;
       transform: translateX(0);
     }
 
-    .tab-count {
+    .rail-count {
       display: inline-grid;
       place-items: center;
       min-width: 26px;
@@ -308,20 +319,20 @@
       font-weight: 900;
     }
 
-    .tab-count:empty {
+    .rail-count:empty {
       display: none;
     }
 
-    .tab-btn.active {
+    .rail-btn.active {
       background: var(--yellow);
       transform: translate(2px, 2px);
       box-shadow: 2px 2px 0 #000000;
     }
 
-    .tab-btn[data-topic="tech"].active { background: #dbeafe; color: #111111; }
-    .tab-btn[data-topic="finance"].active { background: #dcfce7; color: #111111; }
-    .tab-btn[data-topic="sports"].active { background: #fef3c7; color: #111111; color: #111111; }
-    .tab-btn[data-topic="world"].active { background: #fce7f3; color: #111111; }
+    .rail-btn[data-topic="tech"].active { background: #dbeafe; color: #111111; }
+    .rail-btn[data-topic="finance"].active { background: #dcfce7; color: #111111; }
+    .rail-btn[data-topic="sports"].active { background: #fef3c7; color: #111111; color: #111111; }
+    .rail-btn[data-topic="world"].active { background: #fce7f3; color: #111111; }
 
     .grid {
       display: grid;
@@ -410,7 +421,7 @@
       padding: 14px 16px;
       border: 3px solid var(--ink);
       border-radius: 14px;
-      background: var(--card-soft);
+      background: #fffaf0;
       box-shadow: var(--shadow-sm);
     }
 
@@ -429,12 +440,11 @@
 
     .article-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
       gap: 18px;
     }
 
     .article-card {
-      position: relative;
       overflow: hidden;
       border: 3px solid var(--ink);
       border-radius: 22px;
@@ -450,17 +460,14 @@
     }
 
     .article-media {
-      height: 132px;
+      height: 128px;
       border-bottom: 3px solid var(--ink);
       background:
-        radial-gradient(circle at 20% 20%, rgba(255, 228, 92, 0.9), transparent 28%),
-        radial-gradient(circle at 78% 22%, rgba(255, 92, 168, 0.55), transparent 30%),
+        radial-gradient(circle at 22% 20%, rgba(255, 228, 92, 0.95), transparent 28%),
+        radial-gradient(circle at 78% 24%, rgba(255, 92, 168, 0.60), transparent 30%),
         linear-gradient(135deg, var(--blue), var(--purple));
       display: grid;
       place-items: center;
-      color: #111111;
-      font-size: 36px;
-      font-weight: 900;
     }
 
     .article-media img {
@@ -470,6 +477,17 @@
       display: block;
     }
 
+    .topic-chip {
+      border: 3px solid #111111;
+      border-radius: 999px;
+      background: var(--yellow);
+      color: #111111;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: 4px 4px 0 #000000;
+    }
+
     .article-body {
       padding: 16px;
     }
@@ -477,8 +495,8 @@
     .article-card h3 {
       margin: 0;
       font-size: clamp(16px, 1.7vw, 20px);
-      line-height: 1.35;
-      letter-spacing: -0.15px;
+      line-height: 1.38;
+      letter-spacing: -0.12px;
       font-weight: 850;
     }
 
@@ -594,16 +612,20 @@
 
 
     body[data-theme="dark"] .content li,
-    body[data-theme="dark"] .article-card {
+    body[data-theme="dark"] .article-card,
+    body[data-theme="dark"] .content-card,
+    body[data-theme="dark"] .hero,
+    body[data-theme="dark"] .btn.secondary {
       background: var(--card);
+      color: var(--ink);
     }
 
     body[data-theme="dark"] .content strong {
-      background: rgba(122, 162, 255, 0.24);
+      background: rgba(147, 197, 253, 0.25);
     }
 
     body[data-theme="dark"] .content em {
-      background: rgba(255, 228, 92, 0.18);
+      background: rgba(253, 224, 71, 0.18);
     }
 
     @media (max-width: 860px) {
@@ -630,20 +652,20 @@
         padding-right: 20px;
       }
 
-      .tabs {
+      .topic-rail {
         left: 10px;
         top: auto;
         bottom: 14px;
         transform: none;
-        width: 54px;
+        width: 56px;
       }
 
-      .tabs:hover,
-      .tabs:focus-within {
-        width: min(238px, calc(100vw - 24px));
+      .topic-rail:hover,
+      .topic-rail:focus-within {
+        width: min(244px, calc(100vw - 24px));
       }
 
-      .tab-btn {
+      .rail-btn {
         font-size: 13px;
       }
     }
@@ -662,9 +684,9 @@
       </div>
 
       <div class="actions">
-        <button class="btn secondary" onclick="toggleTheme()" id="theme-toggle">🌙 Dark</button>
-        <button class="btn secondary" onclick="openJson()">Xem JSON</button>
-        <button class="btn" onclick="loadDigest()">Tải lại radar</button>
+        <button class="btn secondary" id="theme-toggle" type="button">🌙 Dark</button>
+        <button class="btn secondary" id="json-btn" type="button">Xem JSON</button>
+        <button class="btn" id="reload-btn" type="button">Tải lại radar</button>
       </div>
     </header>
 
@@ -680,21 +702,21 @@
       </div>
     </section>
 
-    <nav class="tabs" aria-label="Topic tabs">
-      <button class="tab-btn active" data-topic="overview" onclick="setTab('overview')">
-        <span class="tab-emoji">🌅</span><span class="tab-text">Tổng quan</span>
+    <nav class="topic-rail" aria-label="Topic tabs">
+      <button class="rail-btn active" data-topic="overview" type="button" aria-label="Tổng quan">
+        <span class="rail-mark mark-overview"></span><span class="rail-text">Tổng quan</span>
       </button>
-      <button class="tab-btn" data-topic="tech" onclick="setTab('tech')">
-        <span class="tab-emoji">💻</span><span class="tab-text">Công nghệ</span><span class="tab-count" id="count-tech"></span>
+      <button class="rail-btn" data-topic="tech" type="button" aria-label="Công nghệ">
+        <span class="rail-mark mark-tech"></span><span class="rail-text">Công nghệ</span><span class="rail-count" id="count-tech"></span>
       </button>
-      <button class="tab-btn" data-topic="finance" onclick="setTab('finance')">
-        <span class="tab-emoji">📈</span><span class="tab-text">Chứng khoán</span><span class="tab-count" id="count-finance"></span>
+      <button class="rail-btn" data-topic="finance" type="button" aria-label="Chứng khoán">
+        <span class="rail-mark mark-finance"></span><span class="rail-text">Chứng khoán</span><span class="rail-count" id="count-finance"></span>
       </button>
-      <button class="tab-btn" data-topic="sports" onclick="setTab('sports')">
-        <span class="tab-emoji">🏆</span><span class="tab-text">Thể thao</span><span class="tab-count" id="count-sports"></span>
+      <button class="rail-btn" data-topic="sports" type="button" aria-label="Thể thao">
+        <span class="rail-mark mark-sports"></span><span class="rail-text">Thể thao</span><span class="rail-count" id="count-sports"></span>
       </button>
-      <button class="tab-btn" data-topic="world" onclick="setTab('world')">
-        <span class="tab-emoji">🌍</span><span class="tab-text">Thế giới</span><span class="tab-count" id="count-world"></span>
+      <button class="rail-btn" data-topic="world" type="button" aria-label="Thế giới">
+        <span class="rail-mark mark-world"></span><span class="rail-text">Thế giới</span><span class="rail-count" id="count-world"></span>
       </button>
     </nav>
 
@@ -747,7 +769,7 @@
 
     let appData = null;
     let activeTab = 'overview';
-    let articleLang = 'vi';
+    const articleLangById = {};
 
     function escapeHtml(value) {
       return String(value)
@@ -951,7 +973,7 @@
 
       for (const topic of ['tech', 'finance', 'sports', 'world']) {
         const el = document.getElementById(`count-${topic}`);
-        if (el) el.textContent = counts[topic] ? String(counts[topic]) : '';
+        if (el) el.textContent = counts[topic] ? `(${counts[topic]})` : '';
       }
     }
 
@@ -963,7 +985,7 @@
     function renderActiveTab() {
       if (!appData) return;
 
-      document.querySelectorAll('.tab-btn').forEach((btn) => {
+      document.querySelectorAll('.rail-btn').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.topic === activeTab);
       });
 
@@ -993,24 +1015,60 @@
       contentEl.innerHTML = `<div class="article-grid">${articles.map(renderArticleCard).join('')}</div>`;
     }
 
+    function getPlainText(value) {
+      return String(value || '')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1')
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function getShortText(value, maxLength = 185) {
+      const text = getPlainText(value);
+      if (text.length <= maxLength) return text;
+      return `${text.slice(0, maxLength).trim()}…`;
+    }
+
+    function getArticleKey(article) {
+      return String(article.id || article.url || `${article.source}-${article.title}`);
+    }
+
+    function getArticleLang(article) {
+      return articleLangById[getArticleKey(article)] || 'vi';
+    }
+
+    function setArticleLang(key, lang) {
+      articleLangById[String(key)] = lang === 'en' ? 'en' : 'vi';
+      renderActiveTab();
+    }
+
+    function getTopicLabel(topic) {
+      const label = TOPIC_LABELS[topic] || 'Radar';
+      return label.toUpperCase();
+    }
+
+    function getArticleImage(article) {
+      return article.imageUrl || article.image || article.thumbnail || article.coverImage || null;
+    }
+
     function renderArticleCard(article) {
       const source = article.source || activeTab;
       const date = formatDate(article.publishedAt || article.createdAt);
       const image = getArticleImage(article);
-      const title = articleLang === 'en'
-        ? getShortText(article.title, 120)
-        : getShortText(article.title, 120);
-      const description = articleLang === 'en'
+      const key = getArticleKey(article);
+      const lang = getArticleLang(article);
+      const title = getShortText(article.title, 120);
+      const description = lang === 'en'
         ? getShortText(article.title, 185)
         : getShortText(article.summary || article.title, 185);
 
       return `
         <article class="article-card">
           <div class="article-media">
-            ${
-              image
-                ? `<img src="${safeUrl(image)}" alt="" loading="lazy" />`
-                : `<span>${getArticleInitial(article)}</span>`
+            ${image
+              ? `<img src="${safeUrl(image)}" alt="" loading="lazy" />`
+              : `<span class="topic-chip">${escapeHtml(getTopicLabel(article.topic || activeTab))}</span>`
             }
           </div>
           <div class="article-body">
@@ -1023,8 +1081,8 @@
             </div>
             <div class="article-bottom">
               <div class="lang-switch" aria-label="Chọn ngôn ngữ bài viết">
-                <button class="lang-btn ${articleLang === 'vi' ? 'active' : ''}" onclick="setArticleLang('vi')">VI</button>
-                <button class="lang-btn ${articleLang === 'en' ? 'active' : ''}" onclick="setArticleLang('en')">EN</button>
+                <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" data-lang="vi" data-article-key="${escapeHtml(key)}" type="button">VI</button>
+                <button class="lang-btn ${lang === 'en' ? 'active' : ''}" data-lang="en" data-article-key="${escapeHtml(key)}" type="button">EN</button>
               </div>
               <a class="detail-link" href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">
                 Xem chi tiết <span aria-hidden="true">↗</span>
@@ -1035,11 +1093,53 @@
       `;
     }
 
+    function applyTheme(theme) {
+      const nextTheme = theme === 'dark' ? 'dark' : 'light';
+      document.body.dataset.theme = nextTheme;
+      localStorage.setItem('devradar-theme', nextTheme);
+
+      const toggle = document.getElementById('theme-toggle');
+      if (toggle) toggle.textContent = nextTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
+    }
+
+    function toggleTheme() {
+      applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    function getSavedTheme() {
+      const saved = localStorage.getItem('devradar-theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function bindUIEvents() {
+      document.querySelectorAll('.rail-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          setTab(btn.dataset.topic || 'overview');
+        });
+      });
+
+      document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+      document.getElementById('json-btn')?.addEventListener('click', openJson);
+      document.getElementById('reload-btn')?.addEventListener('click', loadDigest);
+
+      document.getElementById('content')?.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const button = target.closest('.lang-btn');
+        if (!(button instanceof HTMLElement)) return;
+
+        setArticleLang(button.dataset.articleKey || '', button.dataset.lang || 'vi');
+      });
+    }
+
     function openJson() {
       window.open(API_ENDPOINTS[0], '_blank');
     }
 
     applyTheme(getSavedTheme());
+    bindUIEvents();
     loadDigest();
   </script>
 </body>
