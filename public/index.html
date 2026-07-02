@@ -10,72 +10,60 @@
 
     :root {
       --bg: #fff4d6;
-      --ink: #111111;
-      --stroke: #111111;
-      --muted: #4b5563;
+      --bg-2: #fef3c7;
+      --ink: #111827;
+      --muted: #64748b;
+      --line: #111827;
       --card: #ffffff;
-      --card-soft: #fffaf0;
-      --surface: rgba(255, 255, 255, 0.76);
-      --blue: #4f7cff;
-      --pink: #ff5ca8;
-      --yellow: #ffe45c;
-      --green: #66e28a;
-      --orange: #ff9f43;
-      --red: #ff6b6b;
-      --purple: #c084fc;
-      --rail-bg: rgba(255, 255, 255, 0.78);
-      --shadow: 8px 8px 0 var(--stroke);
-      --shadow-sm: 4px 4px 0 var(--stroke);
-      --soft-shadow: 0 14px 35px rgba(17, 17, 17, 0.14);
-      --radius: 18px;
+      --card-2: #fffaf0;
+      --panel: rgba(255, 255, 255, 0.78);
+      --accent: #4f7cff;
+      --accent-2: #ff5ca8;
+      --accent-3: #ffe45c;
+      --good: #66e28a;
+      --shadow: 8px 8px 0 #111827;
+      --shadow-sm: 4px 4px 0 #111827;
+      --radius: 22px;
     }
 
     body[data-theme="dark"] {
-      --bg: #0b0f17;
-      --ink: #e8edf6;
-      --stroke: #334155;
-      --muted: #9aa7b8;
-      --card: #151b25;
-      --card-soft: #1d2531;
-      --surface: rgba(21, 27, 37, 0.78);
-      --blue: #5f8fe8;
-      --pink: #ba6f94;
-      --yellow: #d6bd68;
-      --green: #72b985;
-      --orange: #c98c59;
-      --red: #cc6b7e;
-      --purple: #9184d8;
-      --rail-bg: rgba(18, 23, 33, 0.82);
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.34);
-      --shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.28);
-      --soft-shadow: 0 20px 52px rgba(0, 0, 0, 0.35);
+      --bg: #0b1220;
+      --bg-2: #111827;
+      --ink: #e5e7eb;
+      --muted: #9ca3af;
+      --line: #334155;
+      --card: #121a2a;
+      --card-2: #172235;
+      --panel: rgba(18, 26, 42, 0.78);
+      --accent: #8fb3ff;
+      --accent-2: #d78ad7;
+      --accent-3: #d4b45f;
+      --good: #74c69d;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+      --shadow-sm: 0 12px 26px rgba(0, 0, 0, 0.22);
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      font-family:
-        "Be Vietnam Pro", "Segoe UI", Tahoma, Arial, sans-serif;
+      font-family: "Be Vietnam Pro", "Segoe UI", Tahoma, Arial, sans-serif;
       text-rendering: geometricPrecision;
       -webkit-font-smoothing: antialiased;
       font-synthesis: none;
       background:
-        radial-gradient(circle at 10% 10%, rgba(255, 92, 168, 0.16), transparent 24%),
-        radial-gradient(circle at 90% 18%, rgba(79, 124, 255, 0.14), transparent 28%),
-        linear-gradient(135deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 86%, var(--yellow)) 100%);
+        radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 26%),
+        radial-gradient(circle at 92% 16%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 28%),
+        linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 100%);
       color: var(--ink);
       line-height: 1.65;
       transition: background 180ms ease, color 180ms ease;
-    }
-
-    body[data-theme="dark"] {
-      background:
-        radial-gradient(circle at 12% 12%, rgba(95, 143, 232, 0.10), transparent 28%),
-        radial-gradient(circle at 88% 18%, rgba(186, 111, 148, 0.08), transparent 28%),
-        linear-gradient(135deg, #0b0f17 0%, #111827 100%);
     }
 
     a {
@@ -88,7 +76,7 @@
     .page {
       width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 28px 0 52px;
+      padding: 28px 0 64px;
     }
 
     .topbar {
@@ -106,16 +94,16 @@
     }
 
     .logo {
-      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
       display: grid;
       place-items: center;
       width: 56px;
       height: 56px;
-      border: 3px solid var(--stroke);
-      border-radius: 16px;
-      background: var(--yellow);
+      border: 3px solid var(--line);
+      border-radius: 18px;
+      background: var(--accent-3);
+      color: #111827;
       box-shadow: var(--shadow-sm);
-      font-size: 28px;
+      font-size: 26px;
       transform: rotate(-3deg);
     }
 
@@ -140,23 +128,22 @@
       justify-content: flex-end;
     }
 
-    .btn,
-    .tab-btn {
-      border: 3px solid var(--stroke);
+    .btn {
+      border: 3px solid var(--line);
       border-radius: 999px;
-      background: var(--blue);
-      color: white;
+      background: var(--accent);
+      color: #ffffff;
       padding: 12px 18px;
+      font-family: inherit;
       font-weight: 900;
       cursor: pointer;
       box-shadow: var(--shadow-sm);
-      transition: transform 120ms ease, box-shadow 120ms ease;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 160ms ease;
     }
 
-    .btn:hover,
-    .tab-btn:hover {
+    .btn:hover {
       transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--ink);
+      box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 95%, #000000);
     }
 
     .btn.secondary {
@@ -164,10 +151,14 @@
       color: var(--ink);
     }
 
+    body[data-theme="dark"] .btn {
+      color: var(--ink);
+    }
+
     .hero {
       position: relative;
-      border: 4px solid var(--stroke);
-      border-radius: 28px;
+      border: 4px solid var(--line);
+      border-radius: 30px;
       background: var(--card);
       box-shadow: var(--shadow);
       overflow: hidden;
@@ -178,15 +169,20 @@
       content: "";
       position: absolute;
       inset: 0;
-      height: 18px;
-      background: repeating-linear-gradient(
+      height: 16px;
+      background: linear-gradient(
         90deg,
-        var(--pink) 0 60px,
-        var(--yellow) 60px 120px,
-        var(--green) 120px 180px,
-        var(--blue) 180px 240px
+        var(--accent-2),
+        var(--accent-3),
+        var(--good),
+        var(--accent)
       );
-      border-bottom: 4px solid var(--stroke);
+      border-bottom: 4px solid var(--line);
+      opacity: 0.9;
+    }
+
+    body[data-theme="dark"] .hero::before {
+      opacity: 0.38;
     }
 
     .hero-inner {
@@ -206,24 +202,27 @@
       align-items: center;
       gap: 8px;
       padding: 7px 12px;
-      border: 3px solid var(--stroke);
+      border: 3px solid var(--line);
       border-radius: 999px;
-      background: var(--yellow);
+      background: var(--accent-3);
+      color: #111827;
       font-size: 13px;
       font-weight: 900;
-      box-shadow: 3px 3px 0 var(--ink);
+      box-shadow: 3px 3px 0 color-mix(in srgb, var(--line) 90%, #000000);
     }
 
-    .pill.blue { background: #dbeafe; }
-    .pill.green { background: #dcfce7; }
-    .pill.pink { background: #fce7f3; }
+    .pill.blue {
+      background: color-mix(in srgb, var(--accent) 24%, var(--card));
+      color: var(--ink);
+    }
 
     .digest-title {
       margin: 0;
       font-size: clamp(34px, 6vw, 64px);
-      line-height: 0.95;
-      letter-spacing: -1.2px;
+      line-height: 1.08;
+      letter-spacing: -0.9px;
       max-width: 980px;
+      font-weight: 900;
     }
 
     .meta {
@@ -232,140 +231,7 @@
       font-weight: 800;
     }
 
-    .topic-rail {
-      position: fixed;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 80;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 52px;
-      padding: 10px 8px;
-      overflow: hidden;
-      border: 2px solid color-mix(in srgb, var(--stroke) 70%, transparent);
-      border-radius: 24px;
-      background: var(--rail-bg);
-      box-shadow: var(--soft-shadow);
-      backdrop-filter: blur(16px);
-      transition: width 230ms ease, border-radius 230ms ease, padding 230ms ease, background 180ms ease;
-    }
-
-    .topic-rail:hover,
-    .topic-rail:focus-within {
-      width: 224px;
-      border-radius: 24px;
-      padding: 10px;
-    }
-
-    .rail-btn {
-      display: grid;
-      grid-template-columns: 28px 1fr auto;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      min-height: 38px;
-      border: 0;
-      border-radius: 16px;
-      background: transparent;
-      color: var(--muted);
-      padding: 6px 8px;
-      font-family: "Be Vietnam Pro", "Segoe UI", Tahoma, Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: 0;
-      white-space: nowrap;
-      text-align: left;
-      cursor: pointer;
-      box-shadow: none;
-      transition: background 140ms ease, color 140ms ease, transform 140ms ease;
-    }
-
-    .rail-btn:hover {
-      background: color-mix(in srgb, var(--card) 72%, transparent);
-      color: var(--ink);
-      transform: translateX(2px);
-    }
-
-    .rail-mark {
-      display: grid;
-      place-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 10px;
-      background: color-mix(in srgb, var(--muted) 16%, transparent);
-      color: var(--ink);
-      font-size: 12px;
-      font-weight: 900;
-      box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--stroke) 38%, transparent);
-      transition: background 140ms ease, transform 140ms ease;
-    }
-
-    .mark-overview::before { content: "•"; }
-    .mark-tech::before { content: "T"; }
-    .mark-finance::before { content: "F"; }
-    .mark-sports::before { content: "S"; }
-    .mark-world::before { content: "W"; }
-
-    .rail-text,
-    .rail-count {
-      opacity: 0;
-      transform: translateX(-8px);
-      transition: opacity 180ms ease, transform 180ms ease;
-    }
-
-    .topic-rail:hover .rail-text,
-    .topic-rail:hover .rail-count,
-    .topic-rail:focus-within .rail-text,
-    .topic-rail:focus-within .rail-count {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .rail-count {
-      display: inline-grid;
-      place-items: center;
-      min-width: 24px;
-      height: 22px;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--yellow) 75%, var(--card));
-      color: #111111;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .rail-count:empty {
-      display: none;
-    }
-
-    .rail-btn.active {
-      background: color-mix(in srgb, var(--card) 82%, var(--yellow));
-      color: var(--ink);
-    }
-
-    .rail-btn.active .rail-mark {
-      background: var(--yellow);
-      color: #111111;
-      transform: scale(1.04);
-    }
-
-    .rail-btn[data-topic="tech"].active .rail-mark { background: #bfdbfe; }
-    .rail-btn[data-topic="finance"].active .rail-mark { background: #bbf7d0; }
-    .rail-btn[data-topic="sports"].active .rail-mark { background: #fed7aa; }
-    .rail-btn[data-topic="world"].active .rail-mark { background: #fbcfe8; }
-
-    body[data-theme="dark"] .rail-btn.active {
-      background: color-mix(in srgb, var(--card-soft) 88%, var(--blue));
-    }
-
-    body[data-theme="dark"] .rail-btn.active .rail-mark {
-      background: color-mix(in srgb, var(--blue) 42%, var(--card));
-      color: var(--ink);
-    }
-
-    .grid {
+    .layout {
       display: grid;
       grid-template-columns: 280px 1fr;
       gap: 24px;
@@ -375,11 +241,15 @@
     .sidebar {
       position: sticky;
       top: 18px;
-      border: 4px solid var(--stroke);
+      border: 4px solid var(--line);
       border-radius: var(--radius);
-      background: var(--green);
+      background: color-mix(in srgb, var(--card) 82%, var(--good));
       box-shadow: var(--shadow);
       padding: 18px;
+    }
+
+    body[data-theme="dark"] .sidebar {
+      background: var(--card);
     }
 
     .sidebar h2 {
@@ -392,12 +262,12 @@
       justify-content: space-between;
       gap: 10px;
       padding: 10px 0;
-      border-top: 3px solid rgba(0, 0, 0, 0.18);
+      border-top: 2px solid color-mix(in srgb, var(--line) 22%, transparent);
       font-weight: 900;
     }
 
     .content-card {
-      border: 4px solid var(--stroke);
+      border: 4px solid var(--line);
       border-radius: var(--radius);
       background: var(--card);
       box-shadow: var(--shadow);
@@ -410,9 +280,15 @@
       gap: 12px;
       align-items: center;
       padding: 14px 18px;
-      border-bottom: 4px solid var(--stroke);
-      background: var(--pink);
+      border-bottom: 4px solid var(--line);
+      background: color-mix(in srgb, var(--accent-2) 78%, #ffffff);
+      color: #111827;
       font-weight: 900;
+    }
+
+    body[data-theme="dark"] .content-header {
+      background: #1f2a44;
+      color: var(--ink);
     }
 
     .content {
@@ -426,9 +302,10 @@
       width: fit-content;
       margin: 30px 0 12px;
       padding: 8px 12px;
-      border: 3px solid var(--stroke);
+      border: 3px solid var(--line);
       border-radius: 12px;
-      background: var(--yellow);
+      background: var(--accent-3);
+      color: #111827;
       box-shadow: var(--shadow-sm);
       line-height: 1.2;
     }
@@ -450,60 +327,174 @@
     .content li {
       margin: 12px 0;
       padding: 14px 16px;
-      border: 3px solid var(--stroke);
+      border: 3px solid var(--line);
       border-radius: 14px;
-      background: #fffaf0;
+      background: var(--card-2);
       box-shadow: var(--shadow-sm);
     }
 
     .content strong {
-      background: #dbeafe;
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
       padding: 1px 4px;
       border-radius: 6px;
     }
 
     .content em {
       font-style: normal;
-      background: #fef3c7; color: #111111;
+      background: color-mix(in srgb, var(--accent-3) 28%, transparent);
       padding: 1px 4px;
       border-radius: 6px;
     }
 
+    .topic-nav {
+      position: fixed;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      width: 218px;
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--line) 24%, transparent);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 18px 46px rgba(15, 23, 42, 0.16);
+      backdrop-filter: blur(16px);
+    }
+
+    body[data-theme="dark"] .topic-nav {
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+    }
+
+    .topic-nav-title {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      padding: 0 8px;
+    }
+
+    .topic-btn {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+    }
+
+    .topic-btn:hover {
+      background: color-mix(in srgb, var(--accent) 11%, transparent);
+      color: var(--ink);
+    }
+
+    .topic-btn.active {
+      background: color-mix(in srgb, var(--accent) 18%, var(--card));
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+
+    .topic-count {
+      min-width: 30px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent-3) 72%, var(--card));
+      color: #111827;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .topic-count:empty {
+      display: none;
+    }
+
+    .overview-panel {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .overview-summary {
+      border: 3px solid var(--line);
+      border-radius: 18px;
+      background: var(--card-2);
+      box-shadow: var(--shadow-sm);
+      padding: 18px;
+    }
+
+    .overview-summary h3 {
+      margin: 0 0 10px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--ink);
+    }
+
+    .overview-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .overview-chip {
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
     .article-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
       gap: 18px;
     }
 
     .article-card {
+      position: relative;
       overflow: hidden;
-      border: 2px solid color-mix(in srgb, var(--stroke) 70%, transparent);
+      border: 2px solid color-mix(in srgb, var(--line) 80%, transparent);
       border-radius: 22px;
       background: var(--card);
-      box-shadow: var(--soft-shadow);
-      min-height: 0;
+      box-shadow: var(--shadow-sm);
       transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
     }
 
     .article-card:hover {
       transform: translateY(-2px);
-      border-color: var(--stroke);
-      box-shadow: 0 18px 40px rgba(17, 17, 17, 0.18);
-    }
-
-    body[data-theme="dark"] .article-card:hover {
-      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.36);
+      border-color: var(--line);
     }
 
     .article-media {
-      height: 112px;
-      border-bottom: 2px solid color-mix(in srgb, var(--stroke) 58%, transparent);
+      height: 150px;
+      border-bottom: 2px solid color-mix(in srgb, var(--line) 35%, transparent);
       background:
-        radial-gradient(circle at 22% 22%, color-mix(in srgb, var(--yellow) 46%, transparent), transparent 30%),
-        radial-gradient(circle at 78% 26%, color-mix(in srgb, var(--blue) 34%, transparent), transparent 34%),
-        linear-gradient(135deg, color-mix(in srgb, var(--card-soft) 64%, var(--blue)), var(--card-soft));
+        radial-gradient(circle at 24% 18%, color-mix(in srgb, var(--accent-3) 46%, transparent), transparent 30%),
+        radial-gradient(circle at 76% 22%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 34%),
+        linear-gradient(135deg, color-mix(in srgb, var(--card-2) 76%, var(--accent)), var(--card-2));
       display: grid;
       place-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .article-media img {
@@ -513,25 +504,15 @@
       display: block;
     }
 
-    .topic-chip {
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--card) 76%, var(--yellow));
-      color: var(--ink);
-      padding: 7px 12px;
-      font-size: 12px;
-      font-weight: 900;
-      box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--stroke) 45%, transparent);
-    }
-
     .article-body {
       padding: 16px;
     }
 
     .article-card h3 {
       margin: 0;
-      font-size: clamp(16px, 1.7vw, 20px);
-      line-height: 1.38;
-      letter-spacing: -0.1px;
+      font-size: clamp(17px, 1.7vw, 21px);
+      line-height: 1.35;
+      letter-spacing: -0.15px;
       font-weight: 850;
     }
 
@@ -539,9 +520,8 @@
       margin: 10px 0 0;
       color: var(--muted);
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 650;
       line-height: 1.6;
-      overflow: visible;
     }
 
     .article-meta {
@@ -567,10 +547,10 @@
     .lang-switch {
       display: inline-flex;
       gap: 4px;
-      padding: 3px;
-      border: 1.5px solid color-mix(in srgb, var(--stroke) 55%, transparent);
+      padding: 4px;
+      border: 2px solid color-mix(in srgb, var(--line) 70%, transparent);
       border-radius: 999px;
-      background: var(--card-soft);
+      background: var(--card-2);
     }
 
     .lang-btn {
@@ -578,7 +558,7 @@
       border-radius: 999px;
       background: transparent;
       color: var(--muted);
-      padding: 5px 9px;
+      padding: 5px 8px;
       font-family: inherit;
       font-size: 12px;
       font-weight: 900;
@@ -586,13 +566,8 @@
     }
 
     .lang-btn.active {
-      background: color-mix(in srgb, var(--yellow) 76%, var(--card));
-      color: #111111;
-    }
-
-    body[data-theme="dark"] .lang-btn.active {
-      background: color-mix(in srgb, var(--blue) 36%, var(--card-soft));
-      color: var(--ink);
+      background: var(--accent-3);
+      color: #111827;
     }
 
     .detail-link {
@@ -600,120 +575,44 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      border: 0;
+      border: 2px solid var(--line);
       border-radius: 999px;
-      background: color-mix(in srgb, var(--ink) 90%, var(--card));
-      color: var(--card);
-      padding: 9px 14px;
+      background: var(--accent-3);
+      color: #111827;
+      padding: 8px 13px;
       font-size: 13px;
       font-weight: 900;
       text-decoration: none;
-      box-shadow: none;
-      transition: transform 120ms ease, background 120ms ease;
+      box-shadow: 2px 2px 0 color-mix(in srgb, var(--line) 90%, #000000);
+      transition: transform 120ms ease, box-shadow 120ms ease;
     }
 
     .detail-link:hover {
-      transform: translateY(-1px);
-      background: var(--blue);
-      color: #ffffff;
+      transform: translate(2px, 2px);
+      box-shadow: 0 0 0 color-mix(in srgb, var(--line) 90%, #000000);
     }
 
-
-    .overview-panel {
-      display: grid;
-      gap: 18px;
-    }
-
-    .overview-lead {
-      border: 2px solid color-mix(in srgb, var(--stroke) 65%, transparent);
-      border-radius: 22px;
-      background: var(--card-soft);
-      padding: 18px;
-      box-shadow: var(--soft-shadow);
-    }
-
-    .overview-lead h2 {
-      margin-top: 0;
-    }
-
-    .overview-counts {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-    }
-
-    .overview-count-card {
-      border: 2px solid color-mix(in srgb, var(--stroke) 58%, transparent);
-      border-radius: 18px;
-      background: var(--card);
-      padding: 14px;
-      box-shadow: var(--shadow-sm);
-    }
-
-    body[data-theme="dark"] .overview-count-card {
-      box-shadow: none;
-    }
-
-    .overview-count-card strong {
-      display: block;
-      margin-top: 4px;
-      font-size: 24px;
-      background: none;
-      padding: 0;
-    }
-
-    .overview-section-title {
-      margin: 4px 0 0;
-      font-size: 20px;
-      font-weight: 900;
-    }
-
-    .overview-highlights {
-      display: grid;
-      gap: 12px;
-    }
-
-    .overview-highlight {
-      border: 2px solid color-mix(in srgb, var(--stroke) 55%, transparent);
-      border-radius: 18px;
-      background: var(--card);
-      padding: 14px 16px;
-    }
-
-    .overview-highlight a {
-      text-decoration: none;
-    }
-
-    .back-top {
+    .back-to-top {
       position: fixed;
       right: 22px;
       bottom: 22px;
-      z-index: 90;
-      width: 46px;
-      height: 46px;
-      border: 2px solid color-mix(in srgb, var(--stroke) 70%, transparent);
-      border-radius: 16px;
-      background: var(--card);
-      color: var(--ink);
-      box-shadow: var(--soft-shadow);
+      z-index: 60;
+      width: 48px;
+      height: 48px;
+      display: none;
+      place-items: center;
+      border: 3px solid var(--line);
+      border-radius: 999px;
+      background: var(--accent-3);
+      color: #111827;
+      box-shadow: var(--shadow-sm);
       font-size: 20px;
       font-weight: 900;
       cursor: pointer;
-      opacity: 0;
-      transform: translateY(10px);
-      pointer-events: none;
-      transition: opacity 160ms ease, transform 160ms ease, background 160ms ease;
     }
 
-    .back-top.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    .back-top:hover {
-      background: var(--yellow);
-      color: #111111;
+    .back-to-top.show {
+      display: grid;
     }
 
     .loading {
@@ -727,16 +626,21 @@
 
     .error,
     .empty {
-      border: 4px solid var(--stroke);
-      background: #fecaca; color: #111111;
+      border: 4px solid var(--line);
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
       font-weight: 900;
     }
 
+    .error {
+      background: #fecaca;
+      color: #111827;
+    }
+
     .empty {
-      background: #fef3c7; color: #111111;
+      background: #fef3c7;
+      color: #111827;
     }
 
     .footer {
@@ -746,81 +650,61 @@
       font-weight: 800;
     }
 
+    @media (max-width: 1280px) {
+      .topic-nav {
+        left: 10px;
+        width: 188px;
+      }
 
-    body[data-theme="dark"] .content li,
-    body[data-theme="dark"] .article-card,
-    body[data-theme="dark"] .content-card,
-    body[data-theme="dark"] .hero,
-    body[data-theme="dark"] .btn.secondary {
-      background: var(--card);
-      color: var(--ink);
+      .topic-btn {
+        font-size: 13px;
+        padding: 9px 10px;
+      }
     }
 
-    body[data-theme="dark"] .content strong {
-      background: rgba(147, 197, 253, 0.25);
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .topic-nav {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        top: auto;
+        transform: none;
+        width: auto;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        border-radius: 20px;
+      }
+
+      .topic-nav-title {
+        display: none;
+      }
+
+      .topic-btn {
+        display: flex;
+        justify-content: center;
+        padding: 9px 8px;
+        font-size: 12px;
+      }
+
+      .topic-count {
+        display: none;
+      }
+
+      .page {
+        padding-bottom: 118px;
+      }
     }
 
-    body[data-theme="dark"] .content em {
-      background: rgba(253, 224, 71, 0.18);
-    }
-
-
-    body[data-theme="dark"] .hero::before {
-      background: linear-gradient(90deg, #263347, #1f2937, #2b3443);
-      border-bottom-color: var(--stroke);
-    }
-
-    body[data-theme="dark"] .content-header {
-      background: #202938;
-      border-bottom-color: var(--stroke);
-    }
-
-    body[data-theme="dark"] .sidebar {
-      background: #172033;
-    }
-
-    body[data-theme="dark"] .btn {
-      background: #27344a;
-      color: var(--ink);
-    }
-
-    body[data-theme="dark"] .btn.secondary {
-      background: var(--card);
-      color: var(--ink);
-    }
-
-    body[data-theme="dark"] .logo,
-    body[data-theme="dark"] .pill,
-    body[data-theme="dark"] .content h2,
-    body[data-theme="dark"] .content h3 {
-      background: #263247;
-      color: var(--ink);
-    }
-
-    body[data-theme="dark"] .pill.blue,
-    body[data-theme="dark"] .pill.green,
-    body[data-theme="dark"] .pill.pink {
-      background: #202938;
-      color: var(--ink);
-    }
-
-    body[data-theme="dark"] .content li {
-      background: var(--card-soft);
-      border-color: var(--stroke);
-      box-shadow: none;
-    }
-
-    body[data-theme="dark"] .content strong {
-      background: rgba(95, 143, 232, 0.18);
-      color: var(--ink);
-    }
-
-    body[data-theme="dark"] .content em {
-      background: rgba(214, 189, 104, 0.15);
-      color: var(--ink);
-    }
-
-    @media (max-width: 860px) {
+    @media (max-width: 640px) {
       .topbar {
         align-items: flex-start;
         flex-direction: column;
@@ -830,42 +714,46 @@
         justify-content: flex-start;
       }
 
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        position: static;
-      }
-
       .hero-inner,
       .content {
         padding-left: 20px;
         padding-right: 20px;
       }
 
-      .topic-rail {
-        left: 10px;
-        top: auto;
-        bottom: 76px;
-        transform: none;
-        width: 50px;
-        border-radius: 20px;
+      .digest-title {
+        font-size: clamp(30px, 12vw, 48px);
       }
 
-      .topic-rail:hover,
-      .topic-rail:focus-within {
-        width: min(224px, calc(100vw - 24px));
-      }
-
-      .rail-btn {
-        font-size: 13px;
+      .topic-btn {
+        font-size: 11px;
+        letter-spacing: -0.2px;
       }
     }
   </style>
 </head>
 
 <body data-theme="light">
+  <nav class="topic-nav" aria-label="Topic navigation">
+    <p class="topic-nav-title">Radar menu</p>
+    <button class="topic-btn active" type="button" data-topic="overview">
+      <span>Tổng quan</span><span class="topic-count" id="count-overview"></span>
+    </button>
+    <button class="topic-btn" type="button" data-topic="tech">
+      <span>Công nghệ</span><span class="topic-count" id="count-tech"></span>
+    </button>
+    <button class="topic-btn" type="button" data-topic="finance">
+      <span>Chứng khoán</span><span class="topic-count" id="count-finance"></span>
+    </button>
+    <button class="topic-btn" type="button" data-topic="sports">
+      <span>Thể thao</span><span class="topic-count" id="count-sports"></span>
+    </button>
+    <button class="topic-btn" type="button" data-topic="world">
+      <span>Thế giới</span><span class="topic-count" id="count-world"></span>
+    </button>
+  </nav>
+
+  <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top">↑</button>
+
   <main class="page">
     <header class="topbar">
       <div class="brand">
@@ -877,9 +765,9 @@
       </div>
 
       <div class="actions">
-        <button class="btn secondary" id="theme-toggle" type="button">🌙 Dark</button>
-        <button class="btn secondary" id="json-btn" type="button">Xem JSON</button>
-        <button class="btn" id="reload-btn" type="button">Tải lại radar</button>
+        <button class="btn secondary" type="button" id="theme-toggle">🌙 Dark</button>
+        <button class="btn secondary" type="button" id="json-button">Xem JSON</button>
+        <button class="btn" type="button" id="reload-button">Tải lại radar</button>
       </div>
     </header>
 
@@ -895,27 +783,7 @@
       </div>
     </section>
 
-    <nav class="topic-rail" aria-label="Topic tabs" title="Di chuột để mở menu chủ đề">
-      <button class="rail-btn active" data-topic="overview" type="button" aria-label="Tổng quan">
-        <span class="rail-mark mark-overview"></span><span class="rail-text">Tổng quan</span>
-      </button>
-      <button class="rail-btn" data-topic="tech" type="button" aria-label="Công nghệ">
-        <span class="rail-mark mark-tech"></span><span class="rail-text">Công nghệ</span><span class="rail-count" id="count-tech"></span>
-      </button>
-      <button class="rail-btn" data-topic="finance" type="button" aria-label="Chứng khoán">
-        <span class="rail-mark mark-finance"></span><span class="rail-text">Chứng khoán</span><span class="rail-count" id="count-finance"></span>
-      </button>
-      <button class="rail-btn" data-topic="sports" type="button" aria-label="Thể thao">
-        <span class="rail-mark mark-sports"></span><span class="rail-text">Thể thao</span><span class="rail-count" id="count-sports"></span>
-      </button>
-      <button class="rail-btn" data-topic="world" type="button" aria-label="Thế giới">
-        <span class="rail-mark mark-world"></span><span class="rail-text">Thế giới</span><span class="rail-count" id="count-world"></span>
-      </button>
-    </nav>
-
-    <button class="back-top" id="back-top" type="button" aria-label="Back to top">↑</button>
-
-    <section class="grid">
+    <section class="layout">
       <aside class="sidebar">
         <h2>Radar Stats</h2>
         <div class="stat">
@@ -962,9 +830,16 @@
       world: 'Thế giới',
     };
 
+    const TOPIC_EN = {
+      tech: 'Technology',
+      finance: 'Markets',
+      sports: 'Sports',
+      world: 'World',
+    };
+
     let appData = null;
     let activeTab = 'overview';
-    const articleLangById = {};
+    const articleLang = {};
 
     function escapeHtml(value) {
       return String(value)
@@ -977,12 +852,26 @@
 
     function safeUrl(url) {
       const value = String(url || '').trim();
-
-      if (!/^https?:\/\//i.test(value)) {
-        return '#';
-      }
-
+      if (!/^https?:\/\//i.test(value)) return '#';
       return escapeHtml(value);
+    }
+
+    function getPlainText(value) {
+      return String(value || '')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1')
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function splitTitle(value) {
+      const text = getPlainText(value);
+      const parts = text.split(/\s+—\s+|\s+-\s+/);
+      return {
+        headline: parts[0]?.trim() || text,
+        detail: parts.slice(1).join(' — ').trim(),
+      };
     }
 
     function inlineMarkdown(text) {
@@ -1000,10 +889,8 @@
       );
 
       let safe = escapeHtml(source);
-
       safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       safe = safe.replace(/(^|[^*])\*(?!\s)([^*]+?)\*/g, '$1<em>$2</em>');
-
       safe = safe.replace(
         /(^|[\s(])((https?:\/\/[^\s<>"')]+))/g,
         (_match, prefix, url) =>
@@ -1060,7 +947,6 @@
             html.push('<ul>');
             inList = true;
           }
-
           html.push(`<li>${inlineMarkdown(line.slice(2))}</li>`);
           continue;
         }
@@ -1070,7 +956,6 @@
       }
 
       closeList();
-
       return html.join('');
     }
 
@@ -1094,9 +979,7 @@
       for (const endpoint of API_ENDPOINTS) {
         try {
           const res = await fetch(endpoint, {
-            headers: {
-              Accept: 'application/json',
-            },
+            headers: { Accept: 'application/json' },
             cache: 'no-store',
           });
 
@@ -1113,6 +996,36 @@
       }
 
       throw new Error(errors.join(' | '));
+    }
+
+    function applyTheme(theme) {
+      const nextTheme = theme === 'dark' ? 'dark' : 'light';
+      document.body.dataset.theme = nextTheme;
+      localStorage.setItem('devradar-theme', nextTheme);
+
+      const toggle = document.getElementById('theme-toggle');
+      if (toggle) {
+        toggle.textContent = nextTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
+      }
+    }
+
+    function getSavedTheme() {
+      const saved = localStorage.getItem('devradar-theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function toggleTheme() {
+      applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    function getAllArticles() {
+      const byTopic = appData?.articlesByTopic || {};
+      return ['tech', 'finance', 'sports', 'world'].flatMap((topic) => byTopic[topic] || []);
+    }
+
+    function getTopicArticles(topic) {
+      return appData?.articlesByTopic?.[topic] || [];
     }
 
     async function loadDigest() {
@@ -1165,22 +1078,64 @@
 
     function updateCounts() {
       const counts = appData?.topicCounts || {};
+      const overviewCount = Object.values(counts).reduce((sum, value) => sum + Number(value || 0), 0);
+      const overviewEl = document.getElementById('count-overview');
+      if (overviewEl) overviewEl.textContent = overviewCount ? String(overviewCount) : '';
 
       for (const topic of ['tech', 'finance', 'sports', 'world']) {
         const el = document.getElementById(`count-${topic}`);
-        if (el) el.textContent = counts[topic] ? `(${counts[topic]})` : '';
+        if (el) el.textContent = counts[topic] ? String(counts[topic]) : '';
       }
     }
 
     function setTab(topic) {
       activeTab = topic;
       renderActiveTab();
+
+      const card = document.querySelector('.content-card');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function renderOverview() {
+      const counts = appData?.topicCounts || {};
+      const total = Object.values(counts).reduce((sum, value) => sum + Number(value || 0), 0);
+      const highlights = ['tech', 'finance', 'sports', 'world']
+        .map((topic) => getTopicArticles(topic)[0])
+        .filter(Boolean)
+        .map((article) => {
+          const split = splitTitle(article.title);
+          return `<li><strong>${escapeHtml(TOPIC_LABELS[article.topic] || article.topic)}:</strong> ${escapeHtml(split.headline)}</li>`;
+        })
+        .join('');
+
+      return `
+        <div class="overview-panel">
+          <section class="overview-summary">
+            <h3>Radar hôm nay có gì?</h3>
+            <p>DevRadar đã lọc ${escapeHtml(total)} tín hiệu đáng đọc từ các nguồn công nghệ, tài chính, thể thao và tin thế giới. Phần dưới là bản tổng hợp nhanh; các tab bên trái cho phép xem từng bài riêng lẻ theo chủ đề.</p>
+            <div class="overview-chips">
+              <span class="overview-chip">Công nghệ: ${escapeHtml(counts.tech || 0)}</span>
+              <span class="overview-chip">Chứng khoán: ${escapeHtml(counts.finance || 0)}</span>
+              <span class="overview-chip">Thể thao: ${escapeHtml(counts.sports || 0)}</span>
+              <span class="overview-chip">Thế giới: ${escapeHtml(counts.world || 0)}</span>
+            </div>
+          </section>
+          ${
+            highlights
+              ? `<section class="overview-summary"><h3>Điểm nổi bật nhanh</h3><ul>${highlights}</ul></section>`
+              : ''
+          }
+        </div>
+        ${renderMarkdownBasic(appData.digest.content)}
+      `;
     }
 
     function renderActiveTab() {
       if (!appData) return;
 
-      document.querySelectorAll('.rail-btn').forEach((btn) => {
+      document.querySelectorAll('.topic-btn').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.topic === activeTab);
       });
 
@@ -1190,14 +1145,14 @@
       document.getElementById('stat-topic').textContent = TOPIC_LABELS[activeTab] || activeTab;
 
       if (activeTab === 'overview') {
-        document.getElementById('content-title').textContent = '🌅 Tổng quan hôm nay';
+        document.getElementById('content-title').textContent = '⚡ Morning Brief';
         document.getElementById('stat-items').textContent = getAllArticles().length || appData.topics?.length || 4;
         document.getElementById('stat-words').textContent = countWords(digest.content);
         contentEl.innerHTML = renderOverview();
         return;
       }
 
-      const articles = appData.articlesByTopic?.[activeTab] || [];
+      const articles = getTopicArticles(activeTab);
       document.getElementById('content-title').textContent = `📌 ${TOPIC_LABELS[activeTab]}`;
       document.getElementById('stat-items').textContent = articles.length;
       document.getElementById('stat-words').textContent = '--';
@@ -1210,130 +1165,50 @@
       contentEl.innerHTML = `<div class="article-grid">${articles.map(renderArticleCard).join('')}</div>`;
     }
 
-    function getAllArticles() {
-      const byTopic = appData?.articlesByTopic || {};
-      return ['tech', 'finance', 'sports', 'world'].flatMap((topic) => byTopic[topic] || []);
-    }
-
-    function renderOverview() {
-      const digest = appData.digest;
-      const counts = appData.topicCounts || {};
-      const total = getAllArticles().length;
-      const highlights = ['tech', 'finance', 'sports', 'world']
-        .flatMap((topic) => (appData.articlesByTopic?.[topic] || []).slice(0, 2))
-        .slice(0, 8);
-
-      const countCards = ['tech', 'finance', 'sports', 'world']
-        .map((topic) => `
-          <div class="overview-count-card">
-            <span>${escapeHtml(TOPIC_LABELS[topic])}</span>
-            <strong>${Number(counts[topic] || 0)}</strong>
-          </div>
-        `)
-        .join('');
-
-      const highlightHtml = highlights.length
-        ? `<div class="overview-highlights">
-            ${highlights.map((article) => `
-              <div class="overview-highlight">
-                <a href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">
-                  <strong>${escapeHtml(cleanHeadline(article.title))}</strong>
-                </a>
-                <p>${escapeHtml(getArticleDescription(article, 'vi'))}</p>
-              </div>
-            `).join('')}
-          </div>`
-        : '';
-
-      return `
-        <div class="overview-panel">
-          <section class="overview-lead">
-            <h2>Radar hôm nay có ${total || 'nhiều'} tín hiệu đáng đọc</h2>
-            <p>Bản tổng quan bên dưới được nhóm theo chủ đề. Dùng thanh topic bên trái để chuyển nhanh sang từng nhóm và đọc các bài riêng lẻ.</p>
-          </section>
-          <section class="overview-counts">${countCards}</section>
-          ${highlightHtml ? `<h2 class="overview-section-title">Điểm nổi bật nhanh</h2>${highlightHtml}` : ''}
-          <h2 class="overview-section-title">Morning Brief</h2>
-          <div>${renderMarkdownBasic(digest.content)}</div>
-        </div>
-      `;
-    }
-
-    function getPlainText(value) {
-      return String(value || '')
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1')
-        .replace(/\*\*/g, '')
-        .replace(/\*/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function getShortText(value, maxLength = 220) {
-      const text = getPlainText(value);
-      if (text.length <= maxLength) return text;
-      return text.slice(0, maxLength).trim();
-    }
-
-    function cleanHeadline(value) {
-      const text = getPlainText(value)
-        .split(' — ')[0]
-        .split(' - ')[0]
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      return getShortText(text, 130);
-    }
-
-    function getArticleDescription(article, lang) {
-      if (lang === 'en') {
-        const raw = getPlainText(article.title || '');
-        const parts = raw.split(' — ').map((part) => part.trim()).filter(Boolean);
-        if (parts.length > 1) return getShortText(parts.slice(1).join(' — '), 260);
-        return getShortText(raw, 260);
-      }
-
-      return getShortText(article.summary || article.title || 'Chưa có mô tả.', 260);
-    }
-
-    function getArticleKey(article) {
-      return String(article.id || article.url || `${article.source}-${article.title}`);
-    }
-
-    function getArticleLang(article) {
-      return articleLangById[getArticleKey(article)] || 'vi';
-    }
-
-    function setArticleLang(key, lang) {
-      articleLangById[String(key)] = lang === 'en' ? 'en' : 'vi';
-      renderActiveTab();
-    }
-
-    function getTopicLabel(topic) {
-      const label = TOPIC_LABELS[topic] || 'Radar';
-      return label.toUpperCase();
-    }
-
     function getArticleImage(article) {
       return article.imageUrl || article.image || article.thumbnail || article.coverImage || null;
     }
 
+    function getArticleTitle(article, lang) {
+      const split = splitTitle(article.title);
+      if (lang === 'en') return split.headline;
+
+      if (article.summary) {
+        const summary = getPlainText(article.summary);
+        const short = summary.split(/[.!?。]/)[0]?.trim();
+        if (short && short.length >= 18 && short.length <= 110) return short;
+      }
+
+      return split.headline;
+    }
+
+    function getArticleDescription(article, lang) {
+      const split = splitTitle(article.title);
+
+      if (lang === 'en') {
+        return split.detail || getPlainText(article.summary) || split.headline;
+      }
+
+      return getPlainText(article.summary) || split.detail || split.headline;
+    }
+
     function renderArticleCard(article) {
+      const id = article.id || `${article.source}-${article.externalId}`;
+      const lang = articleLang[id] || 'vi';
       const source = article.source || activeTab;
       const date = formatDate(article.publishedAt || article.createdAt);
       const image = getArticleImage(article);
-      const key = getArticleKey(article);
-      const lang = getArticleLang(article);
-      const title = lang === 'en'
-        ? cleanHeadline(article.title)
-        : cleanHeadline(article.summary || article.title);
+      const title = getArticleTitle(article, lang);
       const description = getArticleDescription(article, lang);
+      const imageLabel = TOPIC_EN[article.topic] || 'Radar';
 
       return `
         <article class="article-card">
           <div class="article-media">
-            ${image
-              ? `<img src="${safeUrl(image)}" alt="" loading="lazy" />`
-              : `<span class="topic-chip">${escapeHtml(getTopicLabel(article.topic || activeTab))}</span>`
+            ${
+              image
+                ? `<img src="${safeUrl(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove(); this.parentElement.textContent='${escapeHtml(imageLabel)}';" />`
+                : `<span>${escapeHtml(imageLabel)}</span>`
             }
           </div>
           <div class="article-body">
@@ -1346,8 +1221,8 @@
             </div>
             <div class="article-bottom">
               <div class="lang-switch" aria-label="Chọn ngôn ngữ bài viết">
-                <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" data-lang="vi" data-article-key="${escapeHtml(key)}" type="button">VI</button>
-                <button class="lang-btn ${lang === 'en' ? 'active' : ''}" data-lang="en" data-article-key="${escapeHtml(key)}" type="button">EN</button>
+                <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" type="button" data-lang="vi" data-article-id="${escapeHtml(id)}">VI</button>
+                <button class="lang-btn ${lang === 'en' ? 'active' : ''}" type="button" data-lang="en" data-article-id="${escapeHtml(id)}">EN</button>
               </div>
               <a class="detail-link" href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">
                 Xem chi tiết <span aria-hidden="true">↗</span>
@@ -1358,61 +1233,41 @@
       `;
     }
 
-    function applyTheme(theme) {
-      const nextTheme = theme === 'dark' ? 'dark' : 'light';
-      document.body.dataset.theme = nextTheme;
-      localStorage.setItem('devradar-theme', nextTheme);
+    function handleContentClick(event) {
+      const langButton = event.target.closest('.lang-btn');
+      if (!langButton) return;
 
-      const toggle = document.getElementById('theme-toggle');
-      if (toggle) toggle.textContent = nextTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
-    }
+      const id = langButton.dataset.articleId;
+      const lang = langButton.dataset.lang;
 
-    function toggleTheme() {
-      applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
-    }
-
-    function getSavedTheme() {
-      const saved = localStorage.getItem('devradar-theme');
-      if (saved === 'dark' || saved === 'light') return saved;
-      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      articleLang[id] = lang === 'en' ? 'en' : 'vi';
+      renderActiveTab();
     }
 
     function bindUIEvents() {
-      document.querySelectorAll('.rail-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          setTab(btn.dataset.topic || 'overview');
-        });
+      document.querySelectorAll('.topic-btn').forEach((button) => {
+        button.addEventListener('click', () => setTab(button.dataset.topic || 'overview'));
       });
 
       document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
-      document.getElementById('json-btn')?.addEventListener('click', openJson);
-      document.getElementById('reload-btn')?.addEventListener('click', loadDigest);
-      document.getElementById('back-top')?.addEventListener('click', () => {
+      document.getElementById('reload-button')?.addEventListener('click', loadDigest);
+      document.getElementById('json-button')?.addEventListener('click', () => {
+        window.open('/digest/today', '_blank');
+      });
+      document.getElementById('content')?.addEventListener('click', handleContentClick);
+
+      const backButton = document.getElementById('back-to-top');
+      backButton?.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 
-      const backTop = document.getElementById('back-top');
       window.addEventListener('scroll', () => {
-        backTop?.classList.toggle('visible', window.scrollY > 520);
+        backButton?.classList.toggle('show', window.scrollY > 600);
       }, { passive: true });
-
-      document.getElementById('content')?.addEventListener('click', (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
-        const button = target.closest('.lang-btn');
-        if (!(button instanceof HTMLElement)) return;
-
-        setArticleLang(button.dataset.articleKey || '', button.dataset.lang || 'vi');
-      });
     }
 
-    function openJson() {
-      window.open(API_ENDPOINTS[0], '_blank');
-    }
-
-    applyTheme(getSavedTheme());
     bindUIEvents();
+    applyTheme(getSavedTheme());
     loadDigest();
   </script>
 </body>

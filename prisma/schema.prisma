@@ -9,14 +9,13 @@ datasource db {
 
 model Article {
   id          Int      @id @default(autoincrement())
-
   source      String
   externalId  String
-
-  topic       String   @default("tech") // tech | finance | sports | world
+  topic       String   @default("tech")
 
   title       String
   url         String
+  imageUrl    String?
 
   summary     String?
   tags        String[] @default([])

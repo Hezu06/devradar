@@ -34,12 +34,8 @@ async function getArticlesByTopic() {
           isRelevant: true,
         },
         orderBy: [
-          {
-            createdAt: 'desc',
-          },
-          {
-            score: 'desc',
-          },
+          { createdAt: 'desc' },
+          { score: 'desc' },
         ],
         take: 12,
         select: {
@@ -49,6 +45,7 @@ async function getArticlesByTopic() {
           topic: true,
           title: true,
           url: true,
+          imageUrl: true,
           summary: true,
           tags: true,
           isRelevant: true,
@@ -97,8 +94,6 @@ async function getTopicCounts() {
 }
 
 app.use(express.json());
-
-// Serve giao diện ở folder public
 app.use(express.static('public'));
 
 app.get('/', (_req, res) => {
@@ -172,6 +167,7 @@ app.get('/articles/latest', async (_req, res) => {
         topic: true,
         title: true,
         url: true,
+        imageUrl: true,
         summary: true,
         tags: true,
         isRelevant: true,

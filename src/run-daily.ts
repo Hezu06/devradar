@@ -34,6 +34,7 @@ type RawArticle = {
   author?: string | null;
   score?: number | null;
   publishedAt?: string | null;
+  imageUrl?: string | null;
   sourceTags?: string[];
 };
 
@@ -64,6 +65,8 @@ type DevToArticle = {
   description?: string;
   url: string;
   published_at?: string;
+  cover_image?: string | null;
+  social_image?: string | null;
   positive_reactions_count?: number;
   comments_count?: number;
   tag_list?: string[] | string;
@@ -83,6 +86,7 @@ type GitHubRepo = {
   topics?: string[];
   owner: {
     login: string;
+    avatar_url?: string;
   };
 };
 
@@ -103,6 +107,7 @@ type ParsedRssItem = {
   description?: string | null;
   author?: string | null;
   publishedAt?: string | null;
+  imageUrl?: string | null;
 };
 
 function sleep(ms: number): Promise<void> {
@@ -223,6 +228,22 @@ function extractXmlLink(block: string): string | null {
   return atomLink?.[1] ? decodeXmlEntities(atomLink[1]) : null;
 }
 
+function extractXmlAttr(block: string, tagPattern: string, attr: string): string | null {
+  const regex = new RegExp(`<${tagPattern}[^>]+${attr}=["']([^"']+)["'][^>]*>`, 'i');
+  const match = block.match(regex);
+  return match?.[1] ? decodeXmlEntities(match[1]) : null;
+}
+
+function extractXmlImage(block: string): string | null {
+  return (
+    extractXmlAttr(block, 'media:content', 'url') ||
+    extractXmlAttr(block, 'media:thumbnail', 'url') ||
+    extractXmlAttr(block, 'enclosure', 'url') ||
+    extractXmlTag(block, 'image') ||
+    null
+  );
+}
+
 function parseRssItems(xml: string): ParsedRssItem[] {
   const blocks = [
     ...xml.matchAll(/<item[\s\S]*?<\/item>/gi),
@@ -244,6 +265,7 @@ function parseRssItems(xml: string): ParsedRssItem[] {
         extractXmlTag(block, 'pubDate') ||
         extractXmlTag(block, 'published') ||
         extractXmlTag(block, 'updated');
+      const imageUrl = extractXmlImage(block);
 
       if (!title || !url) return null;
 
@@ -253,6 +275,7 @@ function parseRssItems(xml: string): ParsedRssItem[] {
         description: description ?? null,
         author: author ?? null,
         publishedAt: publishedAt ?? null,
+        imageUrl: imageUrl ?? null,
       } satisfies ParsedRssItem;
     })
     .filter(
@@ -264,6 +287,7 @@ function parseRssItems(xml: string): ParsedRssItem[] {
         description: string | null;
         author: string | null;
         publishedAt: string | null;
+        imageUrl: string | null;
       } => item !== null,
     )
     .filter((item) => {
@@ -295,6 +319,7 @@ async function fetchRssFeed(config: RssFeedConfig, limit: number): Promise<RawAr
       author: item.author ?? config.source,
       score: null,
       publishedAt: item.publishedAt ? toDate(item.publishedAt)?.toISOString() ?? null : null,
+      imageUrl: item.imageUrl ?? null,
       sourceTags: config.tags,
     }));
 }
@@ -378,6 +403,7 @@ async function fetchDevTo(limit: number): Promise<RawArticle[]> {
       author: article.user?.username ?? article.user?.name ?? null,
       score: (article.positive_reactions_count ?? 0) + (article.comments_count ?? 0),
       publishedAt: article.published_at ?? null,
+      imageUrl: article.cover_image ?? article.social_image ?? null,
       sourceTags: normalizeDevToTags(article.tag_list),
     }));
 }
@@ -432,6 +458,7 @@ async function fetchGitHub(limit: number): Promise<RawArticle[]> {
       author: repo.owner.login,
       score: repo.stargazers_count,
       publishedAt: repo.pushed_at || repo.updated_at || null,
+      imageUrl: `https://opengraph.githubassets.com/devradar/${repo.full_name}`,
       sourceTags: repo.topics ?? ['github', 'open-source'],
     }));
 }
@@ -581,6 +608,7 @@ async function saveArticle(article: RawArticle, aiResult: AIResult): Promise<'cr
       author: article.author ?? null,
       score: article.score ?? null,
       publishedAt: toDate(article.publishedAt),
+      imageUrl: article.imageUrl ?? null,
       summary: aiResult.summary,
       tags: aiResult.tags,
       isRelevant: aiResult.is_relevant,
