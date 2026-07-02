@@ -130,7 +130,7 @@ export default async function handler(req: any, res: any) {
   } catch (error) {
     return res.status(500).json({
       ok: false,
-      message: error instanceof Error ? error.message : 'Unknown error',
+      message: error instanceof Error ? error.message : 'Unknown error.',
     });
   }
 }
