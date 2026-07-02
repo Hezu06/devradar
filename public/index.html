@@ -377,10 +377,9 @@
 
     .topic-btn {
       width: 100%;
-      display: grid;
-      grid-template-columns: 1fr auto;
+      display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: flex-start;
       border: 0;
       border-radius: 14px;
       background: transparent;
@@ -403,22 +402,6 @@
       background: color-mix(in srgb, var(--accent) 18%, var(--card));
       color: var(--ink);
       box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
-    }
-
-    .topic-count {
-      min-width: 30px;
-      height: 24px;
-      display: inline-grid;
-      place-items: center;
-      border-radius: 999px;
-      background: color-mix(in srgb, var(--accent-3) 72%, var(--card));
-      color: #111827;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .topic-count:empty {
-      display: none;
     }
 
     .overview-panel {
@@ -735,21 +718,11 @@
 <body data-theme="light">
   <nav class="topic-nav" aria-label="Topic navigation">
     <p class="topic-nav-title">Radar menu</p>
-    <button class="topic-btn active" type="button" data-topic="overview">
-      <span>Tổng quan</span><span class="topic-count" id="count-overview"></span>
-    </button>
-    <button class="topic-btn" type="button" data-topic="tech">
-      <span>Công nghệ</span><span class="topic-count" id="count-tech"></span>
-    </button>
-    <button class="topic-btn" type="button" data-topic="finance">
-      <span>Chứng khoán</span><span class="topic-count" id="count-finance"></span>
-    </button>
-    <button class="topic-btn" type="button" data-topic="sports">
-      <span>Thể thao</span><span class="topic-count" id="count-sports"></span>
-    </button>
-    <button class="topic-btn" type="button" data-topic="world">
-      <span>Thế giới</span><span class="topic-count" id="count-world"></span>
-    </button>
+    <button class="topic-btn active" type="button" data-topic="overview">Tổng quan</button>
+    <button class="topic-btn" type="button" data-topic="tech">Công nghệ</button>
+    <button class="topic-btn" type="button" data-topic="finance">Chứng khoán</button>
+    <button class="topic-btn" type="button" data-topic="sports">Thể thao</button>
+    <button class="topic-btn" type="button" data-topic="world">Thế giới</button>
   </nav>
 
   <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top">↑</button>
@@ -1077,15 +1050,8 @@
     }
 
     function updateCounts() {
-      const counts = appData?.topicCounts || {};
-      const overviewCount = Object.values(counts).reduce((sum, value) => sum + Number(value || 0), 0);
-      const overviewEl = document.getElementById('count-overview');
-      if (overviewEl) overviewEl.textContent = overviewCount ? String(overviewCount) : '';
-
-      for (const topic of ['tech', 'finance', 'sports', 'world']) {
-        const el = document.getElementById(`count-${topic}`);
-        if (el) el.textContent = counts[topic] ? String(counts[topic]) : '';
-      }
+      // Topic numbers were intentionally removed from the side navigation.
+      // Counts are still used in the overview panel and Radar Stats.
     }
 
     function setTab(topic) {
