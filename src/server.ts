@@ -18,7 +18,27 @@ function getStartOfTodayLocal(): Date {
   return date;
 }
 
-async function getArticlesByTopic() {
+function getDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function parseDateKey(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getNextDay(date: Date): Date {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
+
+async function getArticlesByTopic(date: Date) {
+  const start = date;
+  const end = getNextDay(date);
+
   const articlesByTopic: Record<Topic, unknown[]> = {
     tech: [],
     finance: [],
@@ -32,12 +52,16 @@ async function getArticlesByTopic() {
         where: {
           topic,
           isRelevant: true,
+          createdAt: {
+            gte: start,
+            lt: end,
+          },
         },
         orderBy: [
           { createdAt: 'desc' },
           { score: 'desc' },
         ],
-        take: 12,
+        take: 40,
         select: {
           id: true,
           source: true,
@@ -64,7 +88,10 @@ async function getArticlesByTopic() {
   return articlesByTopic;
 }
 
-async function getTopicCounts() {
+async function getTopicCounts(date: Date) {
+  const start = date;
+  const end = getNextDay(date);
+
   const topicCounts: Record<Topic, number> = {
     tech: 0,
     finance: 0,
@@ -76,6 +103,10 @@ async function getTopicCounts() {
     by: ['topic'],
     where: {
       isRelevant: true,
+      createdAt: {
+        gte: start,
+        lt: end,
+      },
     },
     _count: {
       topic: true,
@@ -91,6 +122,32 @@ async function getTopicCounts() {
   }
 
   return topicCounts;
+}
+
+async function buildDigestPayload(digest: {
+  id: number;
+  date: Date;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  const todayKey = getDateKey(getStartOfTodayLocal());
+  const digestKey = getDateKey(digest.date);
+
+  const [articlesByTopic, topicCounts] = await Promise.all([
+    getArticlesByTopic(digest.date),
+    getTopicCounts(digest.date),
+  ]);
+
+  return {
+    ok: true,
+    isToday: todayKey === digestKey,
+    digest,
+    topics: TOPICS,
+    topicCounts,
+    articlesByTopic,
+  };
 }
 
 app.use(express.json());
@@ -132,18 +189,69 @@ app.get('/digest/today', async (_req, res) => {
       });
     }
 
-    const [articlesByTopic, topicCounts] = await Promise.all([
-      getArticlesByTopic(),
-      getTopicCounts(),
-    ]);
+    return res.json(await buildDigestPayload(latestDigest));
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+app.get('/digest/by-date/:date', async (req, res) => {
+  try {
+    const date = parseDateKey(req.params.date);
+
+    if (!date) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Date phải có dạng YYYY-MM-DD.',
+      });
+    }
+
+    const digest = await prisma.dailyDigest.findUnique({
+      where: {
+        date,
+      },
+    });
+
+    if (!digest) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Không tìm thấy digest cho ngày này.',
+      });
+    }
+
+    return res.json(await buildDigestPayload(digest));
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+app.get('/digests/archive', async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 30), 60);
+
+    const digests = await prisma.dailyDigest.findMany({
+      orderBy: {
+        date: 'desc',
+      },
+      take: Number.isNaN(limit) ? 30 : limit,
+      select: {
+        id: true,
+        date: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
 
     return res.json({
       ok: true,
-      isToday: Boolean(todayDigest),
-      digest: latestDigest,
-      topics: TOPICS,
-      topicCounts,
-      articlesByTopic,
+      digests,
     });
   } catch (error) {
     return res.status(500).json({

@@ -266,6 +266,69 @@
       font-weight: 900;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
+    .archive-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 2px solid color-mix(in srgb, var(--line) 22%, transparent);
+    }
+
+    .archive-list {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .archive-btn,
+    .archive-empty {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 11px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 850;
+      text-align: left;
+    }
+
+    .archive-btn {
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .archive-btn:hover {
+      background: color-mix(in srgb, var(--accent) 11%, transparent);
+      color: var(--ink);
+    }
+
+    .archive-btn.active {
+      background: color-mix(in srgb, var(--accent) 18%, var(--card));
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+
+    .archive-date {
+      display: block;
+      font-weight: 900;
+    }
+
+    .archive-title {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .content-card {
       border: 4px solid var(--line);
       border-radius: var(--radius);
@@ -289,6 +352,54 @@
     body[data-theme="dark"] .content-header {
       background: #1f2a44;
       color: var(--ink);
+    }
+
+    .filter-bar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 190px auto auto;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 4px solid var(--line);
+      background: color-mix(in srgb, var(--card) 88%, var(--accent));
+    }
+
+    .filter-input,
+    .filter-select,
+    .filter-clear,
+    .filter-toggle {
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 850;
+      min-height: 42px;
+    }
+
+    .filter-input,
+    .filter-select {
+      padding: 0 14px;
+      min-width: 0;
+    }
+
+    .filter-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 13px;
+      white-space: nowrap;
+    }
+
+    .filter-toggle input {
+      accent-color: var(--accent-3);
+    }
+
+    .filter-clear {
+      padding: 0 15px;
+      cursor: pointer;
+      background: var(--accent-3);
+      color: #111827;
     }
 
     .content {
@@ -445,7 +556,7 @@
 
     .article-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 18px;
     }
 
@@ -462,6 +573,10 @@
     .article-card:hover {
       transform: translateY(-2px);
       border-color: var(--line);
+    }
+
+    .article-card.no-image .article-media {
+      display: none;
     }
 
     .article-media {
@@ -490,14 +605,6 @@
       display: block;
     }
 
-    .article-card.no-image {
-      grid-template-columns: 1fr;
-    }
-
-    .article-card.no-image .article-media {
-      display: none;
-    }
-
     .article-body {
       padding: 16px;
     }
@@ -509,6 +616,10 @@
       line-height: 1.34;
       letter-spacing: -0.18px;
       font-weight: 850;
+      background: transparent;
+      padding: 0;
+      border: 0;
+      box-shadow: none;
     }
 
     .article-desc {
@@ -587,28 +698,6 @@
       box-shadow: 0 0 0 color-mix(in srgb, var(--line) 90%, #000000);
     }
 
-    @media (max-width: 720px) {
-      .article-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .article-card {
-        grid-template-columns: 1fr;
-      }
-
-      .article-media {
-        width: 100%;
-        height: 168px;
-        min-height: 168px;
-        border-right: 0;
-        border-bottom: 2px solid color-mix(in srgb, var(--line) 34%, transparent);
-      }
-
-      .article-media img {
-        min-height: 168px;
-      }
-    }
-
     .back-to-top {
       position: fixed;
       right: 22px;
@@ -684,6 +773,10 @@
         grid-template-columns: 1fr;
       }
 
+      .filter-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+
       .sidebar {
         position: static;
       }
@@ -744,6 +837,10 @@
       .topic-btn {
         font-size: 11px;
         letter-spacing: -0.2px;
+      }
+
+      .filter-bar {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -809,6 +906,13 @@
           <span>Độ dài</span>
           <span id="stat-words">--</span>
         </div>
+
+        <section class="archive-section" aria-label="Archive">
+          <h2>Archive</h2>
+          <div id="archive-list" class="archive-list">
+            <div class="archive-empty">Đang tải archive...</div>
+          </div>
+        </section>
       </aside>
 
       <article class="content-card">
@@ -816,6 +920,19 @@
           <span id="content-title">⚡ Morning Brief</span>
           <span id="updated-small">--</span>
         </div>
+
+        <div id="filter-bar" class="filter-bar" hidden>
+          <input id="search-input" class="filter-input" type="search" placeholder="Tìm theo tiêu đề, mô tả, nguồn..." />
+          <select id="source-filter" class="filter-select" aria-label="Lọc theo nguồn">
+            <option value="all">Tất cả nguồn</option>
+          </select>
+          <label class="filter-toggle">
+            <input id="image-filter" type="checkbox" />
+            Có ảnh
+          </label>
+          <button id="clear-filter" class="filter-clear" type="button">Xoá lọc</button>
+        </div>
+
         <div id="content" class="content">
           <div class="loading">Đang tải dữ liệu từ DevRadar API...</div>
         </div>
@@ -829,6 +946,8 @@
 
   <script>
     const API_ENDPOINTS = ['/digest/today'];
+    const ARCHIVE_ENDPOINT = '/digests/archive';
+    const DIGEST_BY_DATE_ENDPOINT = '/digest/by-date/';
     const TOPIC_LABELS = {
       overview: 'Tổng quan',
       tech: 'Công nghệ',
@@ -846,6 +965,13 @@
 
     let appData = null;
     let activeTab = 'overview';
+    let currentArchiveDate = null;
+    let archives = [];
+    let filters = {
+      q: '',
+      source: 'all',
+      hasImage: false,
+    };
     const articleLang = {};
 
     function escapeHtml(value) {
@@ -983,14 +1109,67 @@
       return new Date(value).toLocaleString('vi-VN');
     }
 
+    function dateKey(value) {
+      if (!value) return '';
+      return new Date(value).toISOString().slice(0, 10);
+    }
+
+    async function fetchArchiveList() {
+      const archiveEl = document.getElementById('archive-list');
+      if (!archiveEl) return;
+
+      try {
+        const res = await fetch(ARCHIVE_ENDPOINT, {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          throw new Error(data.message || 'Không tải được archive.');
+        }
+
+        archives = Array.isArray(data.digests) ? data.digests : [];
+        renderArchiveList();
+      } catch (error) {
+        archiveEl.innerHTML = `<div class="archive-empty">${escapeHtml(error.message || 'Archive chưa sẵn sàng.')}</div>`;
+      }
+    }
+
+    function renderArchiveList() {
+      const archiveEl = document.getElementById('archive-list');
+      if (!archiveEl) return;
+
+      if (!archives.length) {
+        archiveEl.innerHTML = '<div class="archive-empty">Chưa có archive.</div>';
+        return;
+      }
+
+      archiveEl.innerHTML = archives
+        .map((digest) => {
+          const key = dateKey(digest.date);
+          const active = key === currentArchiveDate ? 'active' : '';
+
+          return `
+            <button class="archive-btn ${active}" type="button" data-date="${escapeHtml(key)}">
+              <span class="archive-date">${formatDate(digest.date)}</span>
+              <span class="archive-title">${escapeHtml(digest.title || 'Morning Radar')}</span>
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+
     function countWords(text) {
       return String(text || '').trim().split(/\s+/).filter(Boolean).length;
     }
 
-    async function fetchJson() {
+    async function fetchJson(endpoints = API_ENDPOINTS) {
       const errors = [];
 
-      for (const endpoint of API_ENDPOINTS) {
+      for (const endpoint of endpoints) {
         try {
           const res = await fetch(endpoint, {
             headers: { Accept: 'application/json' },
@@ -1042,6 +1221,128 @@
       return appData?.articlesByTopic?.[topic] || [];
     }
 
+    function setAppData(data) {
+      appData = data;
+      currentArchiveDate = dateKey(data.digest?.date);
+      activeTab = 'overview';
+      filters = {
+        q: '',
+        source: 'all',
+        hasImage: false,
+      };
+
+      updateFilterInputs();
+      updateHeader();
+      updateCounts();
+      renderArchiveList();
+      renderActiveTab();
+    }
+
+    async function loadDigestByDate(key) {
+      if (!key) return;
+
+      const contentEl = document.getElementById('content');
+      contentEl.innerHTML = '<div class="loading">Đang tải archive...</div>';
+
+      try {
+        const data = await fetchJson([`${DIGEST_BY_DATE_ENDPOINT}${encodeURIComponent(key)}`]);
+
+        if (!data.ok) {
+          throw new Error(data.message || 'Không tải được archive.');
+        }
+
+        setAppData(data);
+      } catch (error) {
+        contentEl.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    function normalizeSearch(value) {
+      return getPlainText(value)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function hasActiveFilters() {
+      return Boolean(filters.q.trim()) || filters.source !== 'all' || filters.hasImage;
+    }
+
+    function articleMatchesFilters(article) {
+      const image = getArticleImage(article);
+
+      if (filters.hasImage && !image) return false;
+
+      if (filters.source !== 'all' && article.source !== filters.source) return false;
+
+      const q = normalizeSearch(filters.q);
+
+      if (!q) return true;
+
+      const haystack = normalizeSearch([
+        article.title,
+        article.summary,
+        article.source,
+        article.author,
+        Array.isArray(article.tags) ? article.tags.join(' ') : '',
+      ].join(' '));
+
+      return haystack.includes(q);
+    }
+
+    function getFilteredArticles(articles) {
+      return articles.filter(articleMatchesFilters);
+    }
+
+    function getSourcesForCurrentData() {
+      return Array.from(
+        new Set(getAllArticles().map((article) => article.source).filter(Boolean)),
+      ).sort();
+    }
+
+    function updateSourceOptions() {
+      const select = document.getElementById('source-filter');
+      if (!select) return;
+
+      const sources = getSourcesForCurrentData();
+      const current = filters.source;
+
+      select.innerHTML = [
+        '<option value="all">Tất cả nguồn</option>',
+        ...sources.map((source) => `<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`),
+      ].join('');
+
+      select.value = sources.includes(current) ? current : 'all';
+      filters.source = select.value;
+    }
+
+    function updateFilterInputs() {
+      const search = document.getElementById('search-input');
+      const source = document.getElementById('source-filter');
+      const image = document.getElementById('image-filter');
+
+      if (search) search.value = filters.q;
+      updateSourceOptions();
+      if (source) source.value = filters.source;
+      if (image) image.checked = filters.hasImage;
+    }
+
+    function setFilterBarVisible(visible) {
+      const bar = document.getElementById('filter-bar');
+      if (bar) bar.hidden = !visible;
+    }
+
+    function clearFilters() {
+      filters = {
+        q: '',
+        source: 'all',
+        hasImage: false,
+      };
+
+      updateFilterInputs();
+      renderActiveTab();
+    }
+
     async function loadDigest() {
       const titleEl = document.getElementById('title');
       const metaEl = document.getElementById('meta');
@@ -1062,11 +1363,8 @@
           throw new Error(data.message || 'API trả về trạng thái không hợp lệ.');
         }
 
-        appData = data;
-        activeTab = 'overview';
-        updateHeader();
-        updateCounts();
-        renderActiveTab();
+        setAppData(data);
+        fetchArchiveList();
       } catch (error) {
         titleEl.textContent = 'Lỗi tải dữ liệu';
         badgeEl.textContent = '❌ Error';
@@ -1151,7 +1449,11 @@
 
       document.getElementById('stat-topic').textContent = TOPIC_LABELS[activeTab] || activeTab;
 
-      if (activeTab === 'overview') {
+      updateSourceOptions();
+      updateFilterInputs();
+
+      if (activeTab === 'overview' && !hasActiveFilters()) {
+        setFilterBarVisible(false);
         document.getElementById('content-title').textContent = '⚡ Morning Brief';
         document.getElementById('stat-items').textContent = getAllArticles().length || appData.topics?.length || 4;
         document.getElementById('stat-words').textContent = countWords(digest.content);
@@ -1159,17 +1461,33 @@
         return;
       }
 
-      const articles = getTopicArticles(activeTab);
-      document.getElementById('content-title').textContent = `📌 ${TOPIC_LABELS[activeTab]}`;
+      setFilterBarVisible(true);
+
+      const baseArticles = activeTab === 'overview'
+        ? getAllArticles()
+        : getTopicArticles(activeTab);
+      const articles = getFilteredArticles(baseArticles);
+
+      document.getElementById('content-title').textContent = activeTab === 'overview'
+        ? '🔎 Kết quả tìm kiếm'
+        : `📌 ${TOPIC_LABELS[activeTab]}`;
       document.getElementById('stat-items').textContent = articles.length;
       document.getElementById('stat-words').textContent = '--';
 
       if (!articles.length) {
-        contentEl.innerHTML = `<div class="empty">Chưa có bài đáng đọc cho tab ${escapeHtml(TOPIC_LABELS[activeTab])}. Chạy GitHub Actions daily job để cập nhật thêm.</div>`;
+        contentEl.innerHTML = `<div class="empty">Không tìm thấy bài phù hợp. Thử xoá bớt bộ lọc hoặc đổi tab.</div>`;
         return;
       }
 
       contentEl.innerHTML = `<div class="article-grid">${articles.map(renderArticleCard).join('')}</div>`;
+    }
+
+    function removeBadImage(img) {
+      const card = img.closest('.article-card');
+      const media = img.closest('.article-media');
+
+      if (media) media.remove();
+      if (card) card.classList.add('no-image');
     }
 
     function validateCardImage(img) {
@@ -1184,44 +1502,31 @@
       }
 
       const ratio = width / height;
-
-      const tooSmall = width < 300 || height < 300;
-      const tooTall = ratio < 0.65;
-      const tooWide = ratio > 1.8;
+      const tooSmall = width < 280 || height < 220;
+      const tooTall = ratio < 0.58;
+      const tooWide = ratio > 2.1;
 
       if (tooSmall || tooTall || tooWide) {
         removeBadImage(img);
       }
     }
 
-    function removeBadImage(img) {
-      const card = img.closest('.article-card');
-      const media = img.closest('.article-media');
-
-      if (media) media.remove();
-      if (card) card.classList.add('no-image');
-    }
-
     function getArticleImage(article) {
       const source = String(article.source || '').toLowerCase();
+      const topic = String(article.topic || '').toLowerCase();
       const image = article.imageUrl || article.image || article.thumbnail || article.coverImage || null;
+
+      // GitHub OpenGraph images are usually text-heavy repo cards, so they make the UI look cluttered.
+      // The fallback topic block looks cleaner for repos.
+      if (source.includes('github')) return null;
 
       if (!image) return null;
 
-      const url = String(image).trim();
+      const url = String(image);
       if (!/^https?:\/\//i.test(url)) return null;
 
-      // Bỏ ảnh kiểu social card / github opengraph / preview text-heavy
-      if (
-        /opengraph\.githubassets\.com/i.test(url) ||
-        /social-preview/i.test(url) ||
-        /default/i.test(url)
-      ) {
-        return null;
-      }
-
-      // GitHub repo thì thường không nên dùng ảnh
-      if (source.includes('github')) {
+      // Avoid generated text cards/logos that usually look bad as thumbnails.
+      if (/opengraph\.githubassets\.com|githubusercontent\.com\/.*\/social-preview/i.test(url)) {
         return null;
       }
 
@@ -1265,41 +1570,22 @@
         <article class="article-card ${image ? 'has-image' : 'no-image'}">
           ${
             image
-              ? `
-                <div class="article-media">
-                  <img
-                    src="${safeUrl(image)}"
-                    alt=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer"
-                    onload="validateCardImage(this)"
-                    onerror="removeBadImage(this)"
-                  />
-                </div>
-              `
-              : `
-                <div class="article-media">
-                  <span>${escapeHtml(imageLabel)}</span>
-                </div>
-              `
+              ? `<div class="article-media"><img src="${safeUrl(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="validateCardImage(this)" onerror="removeBadImage(this)" /></div>`
+              : `<div class="article-media"><span>${escapeHtml(imageLabel)}</span></div>`
           }
-
           <div class="article-body">
             <h3>${escapeHtml(title)}</h3>
             <p class="article-desc">${escapeHtml(description)}</p>
-
             <div class="article-meta">
               <span>${escapeHtml(source)}</span>
               <span>·</span>
               <span>${escapeHtml(date)}</span>
             </div>
-
             <div class="article-bottom">
               <div class="lang-switch" aria-label="Chọn ngôn ngữ bài viết">
                 <button class="lang-btn ${lang === 'vi' ? 'active' : ''}" type="button" data-lang="vi" data-article-id="${escapeHtml(id)}">VI</button>
                 <button class="lang-btn ${lang === 'en' ? 'active' : ''}" type="button" data-lang="en" data-article-id="${escapeHtml(id)}">EN</button>
               </div>
-
               <a class="detail-link" href="${safeUrl(article.url)}" target="_blank" rel="noreferrer">
                 Xem chi tiết <span aria-hidden="true">↗</span>
               </a>
@@ -1308,7 +1594,7 @@
         </article>
       `;
     }
-    
+
     function handleContentClick(event) {
       const langButton = event.target.closest('.lang-btn');
       if (!langButton) return;
@@ -1331,6 +1617,29 @@
         window.open('/digest/today', '_blank');
       });
       document.getElementById('content')?.addEventListener('click', handleContentClick);
+
+      document.getElementById('archive-list')?.addEventListener('click', (event) => {
+        const button = event.target.closest('.archive-btn');
+        if (!button) return;
+        loadDigestByDate(button.dataset.date);
+      });
+
+      document.getElementById('search-input')?.addEventListener('input', (event) => {
+        filters.q = event.target.value;
+        renderActiveTab();
+      });
+
+      document.getElementById('source-filter')?.addEventListener('change', (event) => {
+        filters.source = event.target.value;
+        renderActiveTab();
+      });
+
+      document.getElementById('image-filter')?.addEventListener('change', (event) => {
+        filters.hasImage = event.target.checked;
+        renderActiveTab();
+      });
+
+      document.getElementById('clear-filter')?.addEventListener('click', clearFilters);
 
       const backButton = document.getElementById('back-to-top');
       backButton?.addEventListener('click', () => {
