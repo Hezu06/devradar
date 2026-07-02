@@ -8,10 +8,92 @@ const prisma = new PrismaClient();
 
 const PORT = Number(process.env.PORT || 3000);
 
+type Topic = 'tech' | 'finance' | 'sports' | 'world';
+
+const TOPICS: Topic[] = ['tech', 'finance', 'sports', 'world'];
+
 function getStartOfTodayLocal(): Date {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
   return date;
+}
+
+async function getArticlesByTopic() {
+  const articlesByTopic: Record<Topic, unknown[]> = {
+    tech: [],
+    finance: [],
+    sports: [],
+    world: [],
+  };
+
+  await Promise.all(
+    TOPICS.map(async (topic) => {
+      const articles = await prisma.article.findMany({
+        where: {
+          topic,
+          isRelevant: true,
+        },
+        orderBy: [
+          {
+            createdAt: 'desc',
+          },
+          {
+            score: 'desc',
+          },
+        ],
+        take: 12,
+        select: {
+          id: true,
+          source: true,
+          externalId: true,
+          topic: true,
+          title: true,
+          url: true,
+          summary: true,
+          tags: true,
+          isRelevant: true,
+          author: true,
+          score: true,
+          publishedAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      articlesByTopic[topic] = articles;
+    }),
+  );
+
+  return articlesByTopic;
+}
+
+async function getTopicCounts() {
+  const topicCounts: Record<Topic, number> = {
+    tech: 0,
+    finance: 0,
+    sports: 0,
+    world: 0,
+  };
+
+  const grouped = await prisma.article.groupBy({
+    by: ['topic'],
+    where: {
+      isRelevant: true,
+    },
+    _count: {
+      topic: true,
+    },
+  });
+
+  for (const item of grouped) {
+    const topic = item.topic as Topic;
+
+    if (TOPICS.includes(topic)) {
+      topicCounts[topic] = item._count.topic;
+    }
+  }
+
+  return topicCounts;
 }
 
 app.use(express.json());
@@ -31,67 +113,86 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/digest/today', async (_req, res) => {
-  const today = getStartOfTodayLocal();
+  try {
+    const today = getStartOfTodayLocal();
 
-  const todayDigest = await prisma.dailyDigest.findUnique({
-    where: {
-      date: today,
-    },
-  });
+    const todayDigest = await prisma.dailyDigest.findUnique({
+      where: {
+        date: today,
+      },
+    });
 
-  if (todayDigest) {
+    const latestDigest =
+      todayDigest ??
+      (await prisma.dailyDigest.findFirst({
+        orderBy: {
+          date: 'desc',
+        },
+      }));
+
+    if (!latestDigest) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Chưa có Daily Digest nào. Hãy chạy npm run daily trước.',
+      });
+    }
+
+    const [articlesByTopic, topicCounts] = await Promise.all([
+      getArticlesByTopic(),
+      getTopicCounts(),
+    ]);
+
     return res.json({
       ok: true,
-      isToday: true,
-      digest: todayDigest,
+      isToday: Boolean(todayDigest),
+      digest: latestDigest,
+      topics: TOPICS,
+      topicCounts,
+      articlesByTopic,
     });
-  }
-
-  // Nếu hôm nay chưa có digest, trả về digest mới nhất để UI vẫn có cái đọc
-  const latestDigest = await prisma.dailyDigest.findFirst({
-    orderBy: {
-      date: 'desc',
-    },
-  });
-
-  if (!latestDigest) {
-    return res.status(404).json({
+  } catch (error) {
+    return res.status(500).json({
       ok: false,
-      message: 'Chưa có Daily Digest nào. Hãy chạy npm run digest trước.',
+      message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
-
-  return res.json({
-    ok: true,
-    isToday: false,
-    digest: latestDigest,
-  });
 });
 
 app.get('/articles/latest', async (_req, res) => {
-  const articles = await prisma.article.findMany({
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 30,
-    select: {
-      id: true,
-      source: true,
-      title: true,
-      url: true,
-      summary: true,
-      tags: true,
-      isRelevant: true,
-      score: true,
-      author: true,
-      createdAt: true,
-    },
-  });
+  try {
+    const articles = await prisma.article.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 30,
+      select: {
+        id: true,
+        source: true,
+        externalId: true,
+        topic: true,
+        title: true,
+        url: true,
+        summary: true,
+        tags: true,
+        isRelevant: true,
+        score: true,
+        author: true,
+        publishedAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
 
-  res.json({
-    ok: true,
-    articles,
-  });
+    return res.json({
+      ok: true,
+      articles,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
 });
 
 app.listen(PORT, () => {
