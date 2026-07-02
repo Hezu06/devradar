@@ -21,13 +21,6 @@ const HN_BASE_URL = 'https://hacker-news.firebaseio.com/v0';
 
 const SOURCE_LIMIT_PER_RUN = Number(process.env.SOURCE_LIMIT_PER_RUN || 5);
 const GEMINI_DELAY_MS = Number(process.env.GEMINI_DELAY_MS || 8000);
-
-// GDELT có giới hạn request khá chặt. Nếu gọi finance/sports/world liên tục
-// trong vài giây, API có thể trả 429 Too Many Requests.
-const GDELT_DELAY_MS = Number(process.env.GDELT_DELAY_MS || 15000);
-const GDELT_RETRY_DELAY_MS = Number(process.env.GDELT_RETRY_DELAY_MS || 30000);
-const GDELT_MAX_RETRIES = Number(process.env.GDELT_MAX_RETRIES || 2);
-
 const USER_AGENT = process.env.USER_AGENT || 'DevRadar/1.0';
 
 type Topic = 'tech' | 'finance' | 'sports' | 'world';
@@ -97,17 +90,19 @@ type GitHubSearchResponse = {
   items: GitHubRepo[];
 };
 
-type GdeltArticle = {
-  title?: string;
-  url?: string;
-  domain?: string;
-  seendate?: string;
-  sourceCountry?: string;
-  language?: string;
+type RssFeedConfig = {
+  source: string;
+  topic: Topic;
+  url: string;
+  tags: string[];
 };
 
-type GdeltResponse = {
-  articles?: GdeltArticle[];
+type ParsedRssItem = {
+  title: string;
+  url: string;
+  description?: string | null;
+  author?: string | null;
+  publishedAt?: string | null;
 };
 
 function sleep(ms: number): Promise<void> {
@@ -135,47 +130,6 @@ function getErrorSummary(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function isRetryableGdeltError(error: unknown): boolean {
-  if (!axios.isAxiosError(error)) return false;
-
-  return (
-    error.response?.status === 429 ||
-    error.code === 'ECONNRESET' ||
-    error.code === 'ETIMEDOUT' ||
-    error.code === 'ECONNABORTED'
-  );
-}
-
-async function withGdeltRetry<T>(label: string, request: () => Promise<T>): Promise<T> {
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= GDELT_MAX_RETRIES + 1; attempt += 1) {
-    try {
-      return await request();
-    } catch (error) {
-      lastError = error;
-
-      if (!isRetryableGdeltError(error) || attempt > GDELT_MAX_RETRIES) {
-        throw error;
-      }
-
-      const waitMs =
-        axios.isAxiosError(error) && error.response?.status === 429
-          ? GDELT_RETRY_DELAY_MS * attempt
-          : 10000 * attempt;
-
-      console.warn(
-        `⏳ GDELT ${label} bị limit/lỗi mạng (${getErrorSummary(error)}). ` +
-          `Nghỉ ${Math.ceil(waitMs / 1000)}s rồi thử lại lần ${attempt + 1}.`,
-      );
-
-      await sleep(waitMs);
-    }
-  }
-
-  throw lastError;
-}
-
 function toDate(value: string | null | undefined): Date | null {
   if (!value) return null;
 
@@ -200,22 +154,6 @@ function getDateNDaysAgo(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() - days);
   return date.toISOString().slice(0, 10);
-}
-
-function parseGdeltDate(value: string | null | undefined): string | null {
-  if (!value) return null;
-
-  const direct = new Date(value);
-  if (!Number.isNaN(direct.getTime())) return direct.toISOString();
-
-  const match = value.match(/^(\d{4})(\d{2})(\d{2})T?(\d{2})(\d{2})(\d{2})Z?$/);
-  if (!match) return null;
-
-  const [, year, month, day, hour, minute, second] = match;
-  const iso = `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
-  const parsed = new Date(iso);
-
-  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
 }
 
 function parseAIJson(text: string): AIResult {
@@ -254,6 +192,131 @@ function parseDigestJson(text: string): DigestAIResult {
   }
 
   return parsed;
+}
+
+function decodeXmlEntities(value: string): string {
+  return value
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractXmlTag(block: string, tag: string): string | null {
+  const regex = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i');
+  const match = block.match(regex);
+  return match?.[1] ? decodeXmlEntities(match[1]) : null;
+}
+
+function extractXmlLink(block: string): string | null {
+  const linkTag = extractXmlTag(block, 'link');
+  if (linkTag) return linkTag;
+
+  const atomLink = block.match(/<link[^>]+href=["']([^"']+)["'][^>]*>/i);
+  return atomLink?.[1] ? decodeXmlEntities(atomLink[1]) : null;
+}
+
+function parseRssItems(xml: string): ParsedRssItem[] {
+  const blocks = [
+    ...xml.matchAll(/<item[\s\S]*?<\/item>/gi),
+    ...xml.matchAll(/<entry[\s\S]*?<\/entry>/gi),
+  ].map((match) => match[0]);
+
+  const seen = new Set<string>();
+
+  return blocks
+    .map((block) => {
+      const title = extractXmlTag(block, 'title');
+      const url = extractXmlLink(block) || extractXmlTag(block, 'guid') || extractXmlTag(block, 'id');
+      const description =
+        extractXmlTag(block, 'description') ||
+        extractXmlTag(block, 'summary') ||
+        extractXmlTag(block, 'content:encoded');
+      const author = extractXmlTag(block, 'dc:creator') || extractXmlTag(block, 'author');
+      const publishedAt =
+        extractXmlTag(block, 'pubDate') ||
+        extractXmlTag(block, 'published') ||
+        extractXmlTag(block, 'updated');
+
+      if (!title || !url) return null;
+
+      return {
+        title,
+        url,
+        description: description ?? null,
+        author: author ?? null,
+        publishedAt: publishedAt ?? null,
+      } satisfies ParsedRssItem;
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        title: string;
+        url: string;
+        description: string | null;
+        author: string | null;
+        publishedAt: string | null;
+      } => item !== null,
+    )
+    .filter((item) => {
+      if (item === null) return false;
+      if (seen.has(item.url)) return false;
+      seen.add(item.url);
+      return true;
+    });
+}
+
+async function fetchRssFeed(config: RssFeedConfig, limit: number): Promise<RawArticle[]> {
+  const response = await axios.get<string>(config.url, {
+    headers: {
+      'User-Agent': USER_AGENT,
+      Accept: 'application/rss+xml, application/xml, text/xml, */*',
+    },
+    timeout: 20_000,
+    responseType: 'text',
+  });
+
+  return parseRssItems(response.data)
+    .slice(0, limit)
+    .map((item) => ({
+      source: config.source,
+      externalId: item.url,
+      topic: config.topic,
+      title: item.description ? `${item.title} — ${item.description}` : item.title,
+      url: item.url,
+      author: item.author ?? config.source,
+      score: null,
+      publishedAt: item.publishedAt ? toDate(item.publishedAt)?.toISOString() ?? null : null,
+      sourceTags: config.tags,
+    }));
+}
+
+async function fetchRssTopic(feeds: RssFeedConfig[], limit: number): Promise<RawArticle[]> {
+  const perFeed = Math.max(2, Math.ceil(limit / feeds.length));
+  const articleMap = new Map<string, RawArticle>();
+
+  for (const feed of feeds) {
+    try {
+      const articles = await fetchRssFeed(feed, perFeed);
+      for (const article of articles) {
+        articleMap.set(article.url, article);
+      }
+    } catch (error) {
+      console.warn(`⚠️ RSS ${feed.source} lỗi: ${getErrorSummary(error)}`);
+    }
+
+    await sleep(1000);
+  }
+
+  return Array.from(articleMap.values()).slice(0, limit);
 }
 
 async function fetchHackerNews(limit: number): Promise<RawArticle[]> {
@@ -373,81 +436,68 @@ async function fetchGitHub(limit: number): Promise<RawArticle[]> {
     }));
 }
 
-async function fetchGdeltTopic(
-  topic: Topic,
-  source: string,
-  query: string,
-  tags: string[],
-  limit: number,
-): Promise<RawArticle[]> {
-  const response = await withGdeltRetry(source, () =>
-    axios.get<GdeltResponse>('https://api.gdeltproject.org/api/v2/doc/doc', {
-      params: {
-        query,
-        mode: 'artlist',
-        format: 'json',
-        maxrecords: limit,
-        timespan: '24h',
-        sort: 'hybridrel',
-      },
-      headers: {
-        'User-Agent': USER_AGENT,
-      },
-      timeout: 20_000,
-    }),
-  );
-
-  const articles = response.data.articles ?? [];
-  const seen = new Set<string>();
-
-  return articles
-    .filter((item) => item.title && item.url)
-    .filter((item) => {
-      if (!item.url) return false;
-      if (seen.has(item.url)) return false;
-      seen.add(item.url);
-      return true;
-    })
-    .slice(0, limit)
-    .map((item) => ({
-      source,
-      externalId: item.url as string,
-      topic,
-      title: item.title as string,
-      url: item.url as string,
-      author: item.domain ?? null,
-      score: null,
-      publishedAt: parseGdeltDate(item.seendate),
-      sourceTags: [...tags, item.sourceCountry, item.language].filter(Boolean) as string[],
-    }));
-}
-
 async function fetchFinanceNews(limit: number): Promise<RawArticle[]> {
-  return fetchGdeltTopic(
-    'finance',
-    'gdelt-finance',
-    '(stock market OR Nasdaq OR "S&P 500" OR inflation OR "Federal Reserve" OR earnings OR "Wall Street" OR economy)',
-    ['finance', 'stocks', 'economy'],
+  return fetchRssTopic(
+    [
+      {
+        source: 'marketwatch-topstories',
+        topic: 'finance',
+        url: 'https://feeds.content.dowjones.io/public/rss/mw_topstories',
+        tags: ['finance', 'markets', 'MarketWatch'],
+      },
+      {
+        source: 'marketwatch-headlines',
+        topic: 'finance',
+        url: 'https://feeds.content.dowjones.io/public/rss/mw_realtimeheadlines',
+        tags: ['finance', 'markets', 'MarketWatch'],
+      },
+      {
+        source: 'guardian-business',
+        topic: 'finance',
+        url: 'https://www.theguardian.com/business/rss',
+        tags: ['finance', 'business', 'economy', 'Guardian'],
+      },
+    ],
     limit,
   );
 }
 
 async function fetchSportsHotNews(limit: number): Promise<RawArticle[]> {
-  return fetchGdeltTopic(
-    'sports',
-    'gdelt-sports',
-    '(football OR soccer OR basketball OR tennis OR olympics OR NBA OR "Premier League" OR "World Cup")',
-    ['sports', 'global'],
+  return fetchRssTopic(
+    [
+      {
+        source: 'espn-top',
+        topic: 'sports',
+        url: 'https://www.espn.com/espn/rss/news',
+        tags: ['sports', 'ESPN'],
+      },
+      {
+        source: 'guardian-sport',
+        topic: 'sports',
+        url: 'https://www.theguardian.com/sport/rss',
+        tags: ['sports', 'Guardian'],
+      },
+    ],
     limit,
   );
 }
 
 async function fetchWorldHotNews(limit: number): Promise<RawArticle[]> {
-  return fetchGdeltTopic(
-    'world',
-    'gdelt-world',
-    '(breaking news OR election OR earthquake OR climate OR war OR diplomacy OR "global economy" OR crisis)',
-    ['world', 'global', 'hot'],
+  return fetchRssTopic(
+    [
+      {
+        source: 'guardian-world',
+        topic: 'world',
+        url: 'https://www.theguardian.com/world/rss',
+        tags: ['world', 'global', 'Guardian'],
+      },
+      {
+        source: 'guardian-news',
+        topic: 'world',
+        url: 'https://www.theguardian.com/international/rss',
+        tags: ['world', 'global', 'Guardian'],
+      },
+    ],
     limit,
   );
 }
@@ -488,18 +538,12 @@ Chỉ trả về JSON đúng schema.
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          summary: {
-            type: Type.STRING,
-          },
+          summary: { type: Type.STRING },
           tags: {
             type: Type.ARRAY,
-            items: {
-              type: Type.STRING,
-            },
+            items: { type: Type.STRING },
           },
-          is_relevant: {
-            type: Type.BOOLEAN,
-          },
+          is_relevant: { type: Type.BOOLEAN },
         },
         required: ['summary', 'tags', 'is_relevant'],
       },
@@ -570,8 +614,7 @@ async function collectArticles(): Promise<void> {
 
     try {
       if (['finance', 'sports', 'world'].includes(source.name)) {
-        console.log(`⏳ Nghỉ ${Math.ceil(GDELT_DELAY_MS / 1000)}s trước khi gọi GDELT (${source.name})...`);
-        await sleep(GDELT_DELAY_MS);
+        console.log(`📰 Lấy ${source.name} bằng RSS feeds thay cho GDELT để tránh 429...`);
       }
 
       articles = await source.fetch(SOURCE_LIMIT_PER_RUN);
