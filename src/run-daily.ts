@@ -21,6 +21,13 @@ const HN_BASE_URL = 'https://hacker-news.firebaseio.com/v0';
 
 const SOURCE_LIMIT_PER_RUN = Number(process.env.SOURCE_LIMIT_PER_RUN || 5);
 const GEMINI_DELAY_MS = Number(process.env.GEMINI_DELAY_MS || 8000);
+
+// GDELT có giới hạn request khá chặt. Nếu gọi finance/sports/world liên tục
+// trong vài giây, API có thể trả 429 Too Many Requests.
+const GDELT_DELAY_MS = Number(process.env.GDELT_DELAY_MS || 15000);
+const GDELT_RETRY_DELAY_MS = Number(process.env.GDELT_RETRY_DELAY_MS || 30000);
+const GDELT_MAX_RETRIES = Number(process.env.GDELT_MAX_RETRIES || 2);
+
 const USER_AGENT = process.env.USER_AGENT || 'DevRadar/1.0';
 
 type Topic = 'tech' | 'finance' | 'sports' | 'world';
@@ -105,6 +112,68 @@ type GdeltResponse = {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getErrorSummary(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    const statusText = error.response?.statusText;
+    const data = typeof error.response?.data === 'string'
+      ? error.response.data.slice(0, 160).replace(/\s+/g, ' ').trim()
+      : '';
+
+    return [
+      error.code,
+      status ? `HTTP ${status}` : undefined,
+      statusText,
+      data,
+    ]
+      .filter(Boolean)
+      .join(' - ');
+  }
+
+  return error instanceof Error ? error.message : String(error);
+}
+
+function isRetryableGdeltError(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+
+  return (
+    error.response?.status === 429 ||
+    error.code === 'ECONNRESET' ||
+    error.code === 'ETIMEDOUT' ||
+    error.code === 'ECONNABORTED'
+  );
+}
+
+async function withGdeltRetry<T>(label: string, request: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= GDELT_MAX_RETRIES + 1; attempt += 1) {
+    try {
+      return await request();
+    } catch (error) {
+      lastError = error;
+
+      if (!isRetryableGdeltError(error) || attempt > GDELT_MAX_RETRIES) {
+        throw error;
+      }
+
+      const waitMs =
+        axios.isAxiosError(error) && error.response?.status === 429
+          ? GDELT_RETRY_DELAY_MS * attempt
+          : 10000 * attempt;
+
+      console.warn(
+        `⏳ GDELT ${label} bị limit/lỗi mạng (${getErrorSummary(error)}). ` +
+          `Nghỉ ${Math.ceil(waitMs / 1000)}s rồi thử lại lần ${attempt + 1}.`,
+      );
+
+      await sleep(waitMs);
+    }
+  }
+
+  throw lastError;
 }
 
 function toDate(value: string | null | undefined): Date | null {
@@ -311,20 +380,22 @@ async function fetchGdeltTopic(
   tags: string[],
   limit: number,
 ): Promise<RawArticle[]> {
-  const response = await axios.get<GdeltResponse>('https://api.gdeltproject.org/api/v2/doc/doc', {
-    params: {
-      query,
-      mode: 'artlist',
-      format: 'json',
-      maxrecords: limit,
-      timespan: '24h',
-      sort: 'hybridrel',
-    },
-    headers: {
-      'User-Agent': USER_AGENT,
-    },
-    timeout: 20_000,
-  });
+  const response = await withGdeltRetry(source, () =>
+    axios.get<GdeltResponse>('https://api.gdeltproject.org/api/v2/doc/doc', {
+      params: {
+        query,
+        mode: 'artlist',
+        format: 'json',
+        maxrecords: limit,
+        timespan: '24h',
+        sort: 'hybridrel',
+      },
+      headers: {
+        'User-Agent': USER_AGENT,
+      },
+      timeout: 20_000,
+    }),
+  );
 
   const articles = response.data.articles ?? [];
   const seen = new Set<string>();
@@ -498,10 +569,15 @@ async function collectArticles(): Promise<void> {
     let articles: RawArticle[] = [];
 
     try {
+      if (['finance', 'sports', 'world'].includes(source.name)) {
+        console.log(`⏳ Nghỉ ${Math.ceil(GDELT_DELAY_MS / 1000)}s trước khi gọi GDELT (${source.name})...`);
+        await sleep(GDELT_DELAY_MS);
+      }
+
       articles = await source.fetch(SOURCE_LIMIT_PER_RUN);
     } catch (error) {
       totalFailed += 1;
-      console.error(`❌ Lỗi lấy nguồn ${source.name}:`, error);
+      console.error(`❌ Lỗi lấy nguồn ${source.name}: ${getErrorSummary(error)}`);
       continue;
     }
 
